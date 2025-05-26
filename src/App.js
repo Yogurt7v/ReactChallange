@@ -1,7 +1,7 @@
-import * as React from 'react';
+import { useState } from 'react';
 
 export default function App() {
-  const [mode, setMode] = React.useState('dark');
+  const [mode, setMode] = useState('dark');
 
   const handleChange = () => {
     if (mode === 'light') {
