@@ -1,16 +1,31 @@
-import * as React from 'react';
+import { getIsLactoseTolerant } from './utils';
 
-function Layout() {
+function LactoseIntolerant() {
   return (
-    <div className="box">
-      <header className="header">Header</header>
-      <main className="main">Main</main>
-      <aside className="aside">Aside</aside>
-      <footer className="footer">Footer</footer>
-    </div>
+    <h1>
+      <span role="img" aria-label="broccoli and strawberry">
+        🥦🍓
+      </span>
+    </h1>
+  );
+}
+
+function LactoseTolerant() {
+  return (
+    <h1>
+      <span role="img" aria-label="milk and cheese">
+        🥛🧀
+      </span>
+    </h1>
   );
 }
 
 export default function App() {
-  return <Layout />;
+  const isLactoseTolerant = getIsLactoseTolerant();
+
+  if (isLactoseTolerant) {
+    return LactoseTolerant();
+  } else {
+    return LactoseIntolerant();
+  }
 }
