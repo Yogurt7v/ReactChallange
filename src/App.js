@@ -1,23 +1,19 @@
-function handleChange(event, characterLimit) {
-  if (event.target.value.length > characterLimit) {
-    alert('Character limit exceeded');
-  }
-}
-
-function Input({ characterLimit }) {
-  return (
-    <input
-      onChange={(e) => handleChange(e, characterLimit)}
-      placeholder="Enter some text"
-    />
-  );
-}
+import * as React from 'react';
 
 export default function App() {
+  const [mode, setMode] = React.useState('dark');
+
+  const handleChange = () => {
+    if (mode === 'light') {
+      setMode('dark');
+    } else {
+      setMode('light');
+    }
+  };
+
   return (
-    <section>
-      <h1>Character Limit</h1>
-      <Input characterLimit={20} />
-    </section>
+    <main className={mode}>
+      <button onClick={handleChange}>Activate {mode} theme</button>
+    </main>
   );
 }
