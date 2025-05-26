@@ -1,14 +1,23 @@
-export default function App() {
-  function handleChange(e) {
-    if (e.target.value.length > 10) {
-      alert('Character limit exceeded');
-    }
+function handleChange(event, characterLimit) {
+  if (event.target.value.length > characterLimit) {
+    alert('Character limit exceeded');
   }
+}
 
+function Input({ characterLimit }) {
+  return (
+    <input
+      onChange={(e) => handleChange(e, characterLimit)}
+      placeholder="Enter some text"
+    />
+  );
+}
+
+export default function App() {
   return (
     <section>
       <h1>Character Limit</h1>
-      <input placeholder="Enter some text" onChange={(e) => handleChange(e)} />
+      <Input characterLimit={20} />
     </section>
   );
 }
