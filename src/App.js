@@ -1,12 +1,16 @@
-import './App.css';
-import Today from './Date';
+import * as React from 'react';
 
-function App() {
+function Layout() {
   return (
-    <>
-      <Today />
-    </>
+    <div className="box">
+      <header className="header">Header</header>
+      <main className="main">Main</main>
+      <aside className="aside">Aside</aside>
+      <footer className="footer">Footer</footer>
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return <Layout />;
+}

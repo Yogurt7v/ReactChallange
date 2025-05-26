@@ -4,7 +4,43 @@ body {
   box-sizing: border-box;
   background-color: black;
   color: white;
-  display: grid;
-  place-items: center;
+}
+
+.box {
   height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr 3fr 1fr; /* Вертикальное деление */
+  grid-template-columns: 2fr 1fr; /* Горизонтальное деление */
+}
+
+.header {
+  grid-area: 1 / 1 / 2 / 3; /* Занимает всю первую строку */
+  background-color: pink;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer {
+  grid-area: 2 / 1 / 3 / 2; /* Занимает вторую строку, первый столбец */
+  background-color: purple;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.aside {
+  grid-area: 2 / 2 / 3 / 3; /* Занимает вторую строку, второй столбец */
+  background-color: yellow;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main {
+  grid-area: 3 / 1 / 4 / 3; /* Занимает третью строку */
+  background-color: green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
