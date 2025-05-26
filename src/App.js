@@ -1,15 +1,10 @@
 function List() {
-  const friends = [
-    { id: 893, name: 'Lynn' },
-    { id: 871, name: 'Alex' },
-    { id: 982, name: 'Ben' },
-    { id: 61, name: 'Mikenzi' },
-  ];
+  const friends = ['Ben', 'Lynn', 'Alex'];
 
   return (
     <ul>
-      {friends.map(({ id, name }) => (
-        <li key={id}>{name}</li>
+      {friends.map((item, index) => (
+        <li key={index}>{item}</li>
       ))}
     </ul>
   );
