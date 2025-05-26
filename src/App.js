@@ -1,27 +1,20 @@
-import { getIsLactoseTolerant } from './utils';
+function List() {
+  const friends = [
+    { id: 893, name: 'Lynn' },
+    { id: 871, name: 'Alex' },
+    { id: 982, name: 'Ben' },
+    { id: 61, name: 'Mikenzi' },
+  ];
 
-function LactoseIntolerant() {
   return (
-    <h1>
-      <span role="img" aria-label="broccoli and strawberry">
-        🥦🍓
-      </span>
-    </h1>
-  );
-}
-
-function LactoseTolerant() {
-  return (
-    <h1>
-      <span role="img" aria-label="milk and cheese">
-        🥛🧀
-      </span>
-    </h1>
+    <ul>
+      {friends.map(({ id, name }) => (
+        <li key={id}>{name}</li>
+      ))}
+    </ul>
   );
 }
 
 export default function App() {
-  const isLactoseTolerant = getIsLactoseTolerant();
-
-  return isLactoseTolerant ? LactoseTolerant() : LactoseIntolerant();
+  return <List />;
 }
