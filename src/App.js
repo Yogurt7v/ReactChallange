@@ -1,10 +1,10 @@
 import './App.css';
-import Badge from './Badge';
+import Today from './Date';
 
 function App() {
   return (
     <>
-      <Badge />
+      <Today />
     </>
   );
 }
