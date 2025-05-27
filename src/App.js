@@ -2,6 +2,7 @@ import * as React from 'react';
 
 function LimitedTextInput({ characterLimit = 20 }) {
   const [inputValue, setInputValue] = React.useState('');
+  const remainingCharacters = characterLimit - inputValue.length;
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -22,7 +23,7 @@ function LimitedTextInput({ characterLimit = 20 }) {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="limited-text-input">Limited Text Input:</label>
-        <span className="no-error">Characters remaining: TODO</span>
+        <span className="no-error">Characters remaining: {remainingCharacters}</span>
       </div>
       <input
         type="text"
@@ -40,5 +41,5 @@ function LimitedTextInput({ characterLimit = 20 }) {
 }
 
 export default function App() {
-  return LimitedTextInput(10);
+  return LimitedTextInput(30);
 }
