@@ -50,8 +50,12 @@ export default function CountryInfo() {
           {data.error && <span>{data.error.message}</span>}
         </div>
       </header>
-      <p>Capital: {data.data.capital}</p>
-      <p>Population : {data.data.population.toLocaleString('ru-Ru')}</p>
+      {data.data && (
+        <>
+          <p>Capital: {data.data.capital}</p>
+          <p>Population : {data.data.population.toLocaleString('ru-Ru')}</p>
+        </>
+      )}
     </section>
   );
 }
