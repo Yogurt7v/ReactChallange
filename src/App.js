@@ -1,45 +1,56 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 
-function LimitedTextInput({ characterLimit = 20 }) {
-  const [inputValue, setInputValue] = React.useState('');
-  const remainingCharacters = characterLimit - inputValue.length;
+function PasswordInput({ minimum = 8 }) {
+  const [inputValue, setInputValue] = useState('');
+  const [isInputValueVisible, setIsInputVisible] = useState(false);
+  const [thresholdMet, setThresholdMet] = useState(false);
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
+    if (inputValue.length >= minimum) {
+      setThresholdMet(true);
+    } else {
+      setThresholdMet(false);
+    }
+  };
+
+  const handleToggleVisibility = () => {
+    setIsInputVisible(!isInputValueVisible);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (inputValue.length >= characterLimit) {
-      alert('The input exceeds the character limit. Please shorten your text.');
+    if (thresholdMet) {
+      alert('Password submitted');
     } else {
-      alert('Thanks for your submission');
-      setInputValue('');
+      alert('You need a longer password');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="limited-text-input">Limited Text Input:</label>
-        <span className="no-error">Characters remaining: {remainingCharacters}</span>
-      </div>
-      <input
-        type="text"
-        placeholder="Enter some text"
-        id="limited-text-input"
-        value={inputValue}
-        onChange={handleChange}
-      />
-
-      <button type="submit" className="primary">
-        Submit
-      </button>
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="limited-text-input">Password:</label>
+          <span className={thresholdMet ? 'no-error' : 'error'}>{inputValue.length}</span>
+        </div>
+        <form>
+          <input
+            placeholder="Enter a password"
+            type={isInputValueVisible ? 'text' : 'password'}
+            id="limited-text-input"
+            value={inputValue}
+            onChange={handleChange}
+          />
+        </form>
+        <button type="submit">Submit</button>
+      </form>
+      <button onClick={handleToggleVisibility}>Lets see</button>
+    </>
   );
 }
 
 export default function App() {
-  return LimitedTextInput(30);
+  return PasswordInput(4);
 }
