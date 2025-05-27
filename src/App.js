@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import * as React from 'react';
 
 export default function App() {
-  const [mode, setMode] = useState('dark');
+  const [count, setCount] = React.useState(0);
 
-  const handleChange = () => {
-    if (mode === 'light') {
-      setMode('dark');
-    } else {
-      setMode('light');
-    }
-  };
+  function increment() {
+    setCount((prev) => prev + 1);
+  }
+  function decrement() {
+    setCount((prev) => prev - 1);
+  }
 
   return (
-    <main className={mode}>
-      <button onClick={handleChange}>Activate {mode} theme</button>
+    <main>
+      <span>{count}</span>
+      <div>
+        <button onClick={decrement}>-</button>
+        <button onClick={increment}>+</button>
+      </div>
     </main>
   );
 }
