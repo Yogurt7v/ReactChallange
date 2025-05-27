@@ -1,22 +1,44 @@
 import * as React from 'react';
 
-export default function App() {
-  const [count, setCount] = React.useState(0);
+function LimitedTextInput({ characterLimit = 20 }) {
+  const [inputValue, setInputValue] = React.useState('');
 
-  function increment() {
-    setCount((prev) => prev + 1);
-  }
-  function decrement() {
-    setCount((prev) => prev - 1);
-  }
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (inputValue.length >= characterLimit) {
+      alert('The input exceeds the character limit. Please shorten your text.');
+    } else {
+      alert('Thanks for your submission');
+      setInputValue('');
+    }
+  };
 
   return (
-    <main>
-      <span>{count}</span>
+    <form onSubmit={handleSubmit}>
       <div>
-        <button onClick={decrement}>-</button>
-        <button onClick={increment}>+</button>
+        <label htmlFor="limited-text-input">Limited Text Input:</label>
+        <span className="no-error">Characters remaining: TODO</span>
       </div>
-    </main>
+      <input
+        type="text"
+        placeholder="Enter some text"
+        id="limited-text-input"
+        value={inputValue}
+        onChange={handleChange}
+      />
+
+      <button type="submit" className="primary">
+        Submit
+      </button>
+    </form>
   );
+}
+
+export default function App() {
+  return LimitedTextInput(10);
 }
