@@ -38,10 +38,11 @@ export function SearchFilter() {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+      <button onClick={() => setSearchTerm('')}>X</button>
 
       <ul>
-        {filteredItems.map((item) => (
-          <li>{item}</li>
+        {filteredItems.map((item, index) => (
+          <li key={index}>{item}</li>
         ))}
       </ul>
     </div>
