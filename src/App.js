@@ -1,56 +1,130 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
-function PasswordInput({ minimum = 8 }) {
-  const [inputValue, setInputValue] = useState('');
-  const [isInputValueVisible, setIsInputVisible] = useState(false);
-  const [thresholdMet, setThresholdMet] = useState(false);
+export function MultiStepForm() {
+  const [initialFormData, setInitialFormData] = React.useState({
+    name: '',
+    email: '',
+    address: '',
+    city: '',
+    zipcode: '',
+  });
+  const [currentStep, setCurrentStep] = React.useState(1);
 
   const handleChange = (e) => {
-    setInputValue(e.target.value);
-    if (inputValue.length >= minimum) {
-      setThresholdMet(true);
-    } else {
-      setThresholdMet(false);
+    const { id, value } = e.target;
+    setInitialFormData({ ...initialFormData, [id]: value }); // тупанул здесь
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      setCurrentStep(2);
     }
   };
 
-  const handleToggleVisibility = () => {
-    setIsInputVisible(!isInputValueVisible);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (thresholdMet) {
-      alert('Password submitted');
-    } else {
-      alert('You need a longer password');
+  const handlePrevStep = () => {
+    if (currentStep === 2) {
+      setCurrentStep(1);
     }
   };
 
-  return (
-    <>
+  const handleSubmit = () => {
+    alert('Thank you for your submission');
+    console.log(initialFormData);
+  };
+
+  if (currentStep === 1) {
+    return (
       <form onSubmit={handleSubmit}>
+        <h2>Personal Information</h2>
         <div>
-          <label htmlFor="limited-text-input">Password:</label>
-          <span className={thresholdMet ? 'no-error' : 'error'}>{inputValue.length}</span>
+          <label>Step {currentStep} of 3</label>
+          <progress value={currentStep} max={3} />
         </div>
-        <form>
+        <div>
+          <label htmlFor="name">Name</label>
           <input
-            placeholder="Enter a password"
-            type={isInputValueVisible ? 'text' : 'password'}
-            id="limited-text-input"
-            value={inputValue}
+            required
+            name="name"
+            id="name"
+            placeholder="Enter your name"
+            value={initialFormData.name}
             onChange={handleChange}
           />
-        </form>
-        <button type="submit">Submit</button>
+        </div>
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            required
+            name="email"
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            value={initialFormData.email}
+            onChange={handleChange}
+          />
+        </div>
+
+        <button type="button" className="secondary" onClick={handleNextStep}>
+          Next
+        </button>
       </form>
-      <button onClick={handleToggleVisibility}>Lets see</button>
-    </>
-  );
+    );
+  } else if (currentStep === 2) {
+    return (
+      <form onSubmit={handleSubmit}>
+        <h2>Address</h2>
+        <div>
+          <label>Step {currentStep} of 3</label>
+          <progress value={currentStep} max={3} />
+        </div>
+        <div>
+          <label htmlFor="address">Address</label>
+          <input
+            required
+            name="address"
+            id="address"
+            type="address"
+            placeholder="What is your address?"
+            value={initialFormData.address}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="city">City</label>
+          <input
+            required
+            name="city"
+            id="city"
+            placeholder="What city do you live in?"
+            value={initialFormData.city}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="zipcode">Zipcode</label>
+          <input
+            required
+            name="zipcode"
+            id="zipcode"
+            type="number"
+            placeholder="What is your zipcode?"
+            value={initialFormData.zipcode}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <button className="secondary" type="button" onClick={handleSubmit}>
+            Next
+          </button>
+          <button type="button" className="link" onClick={handlePrevStep}>
+            Previous
+          </button>
+        </div>
+      </form>
+    );
+  }
 }
 
 export default function App() {
-  return PasswordInput(4);
+  return MultiStepForm();
 }
