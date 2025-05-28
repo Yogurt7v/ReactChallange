@@ -91,6 +91,9 @@ export function HackerNewsSearch() {
           </ul>
         )}
       </section>
+      <button onClick={handleNextPage}>+</button>
+      <button onClick={handlePrevPage}>-</button>
+      <div> All pages: {totalPages}</div>
     </main>
   );
 }
