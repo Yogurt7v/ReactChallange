@@ -54,3 +54,7 @@ video {
   width: 800px;
   height: 800px;
 }
+
+.big {
+  font-size: 40px;
+}

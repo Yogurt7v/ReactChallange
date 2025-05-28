@@ -1,45 +1,53 @@
 import * as React from 'react';
 
-export function VideoPlayer() {
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const videoRef = React.useRef(null);
+function FieldNotes() {
+  const [notes, setNotes] = React.useState([
+    'Components encapsulate both the visual representation of a particular piece of UI as well as the state and logic that goes along with it.',
+    'The same intuition you have about creating and composing together functions can directly apply to creating and composing components. However, instead of composing functions together to get some value, you can compose components together to get some UI.',
+    'JSX combines the power and expressiveness of JavaScript with the readability and accessibility of HTML',
+    'Just like a component enabled the composition and reusability of UI, hooks enabled the composition and reusability of non-visual logic.',
+  ]);
 
-  React.useEffect(() => {
-    if (isPlaying) {
-      videoRef.current.play();
-    } else {
-      videoRef.current.pause();
-    }
-  }, [isPlaying]);
+  const notesRefs = React.useRef(null);
+  const otherRef = React.useRef(null);
 
-  const handleTogglePlay = () => {
-    setIsPlaying(!isPlaying);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const newNote = formData.get('note');
+    setNotes([...notes, newNote]);
   };
 
+  React.useEffect(() => {
+    notesRefs.current.className = 'big';
+    otherRef.current.className = '';
+  }, [notes]);
+
   return (
-    <section className="container">
-      <h1>Video Player</h1>
-      <article>
-        <video
-          poster="https://image.mux.com/TbVCJiOghmISJgg4AznPfFHYRfiVoek8OJHF56Y01oR4/thumbnail.webp"
-          ref={videoRef}
-        >
-          <source
-            src="https://stream.mux.com/TbVCJiOghmISJgg4AznPfFHYRfiVoek8OJHF56Y01oR4/high.mp4"
-            type="video/mp4"
-          />
-          Ваш браузер не поддерживает видео.
-        </video>
-        <div>
-          <button title={isPlaying ? 'Pause' : 'Play'} onClick={handleTogglePlay}>
-            {isPlaying ? '⏸' : '▶'}
+    <article>
+      <h1>Field Notes</h1>
+      <div>
+        <ul>
+          {notes.map((msg, index) => {
+            return (
+              <li key={index} ref={index === notes.length - 1 ? notesRefs : otherRef}>
+                {msg}
+              </li>
+            );
+          })}
+        </ul>
+        <form onSubmit={handleSubmit}>
+          <input required type="text" name="note" placeholder="Type your note..." />
+          <button className="link" type="submit">
+            Submit
           </button>
-        </div>
-      </article>
-    </section>
+        </form>
+      </div>
+    </article>
   );
 }
 
 export default function App() {
-  return VideoPlayer();
+  return FieldNotes();
 }
