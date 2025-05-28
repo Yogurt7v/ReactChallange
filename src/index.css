@@ -44,3 +44,17 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+.container {
+  width: 800px;
+  height: 800px;
+}
+
+video {
+  width: 800px;
+  height: 800px;
+}
+
+.big {
+  font-size: 40px;
+}

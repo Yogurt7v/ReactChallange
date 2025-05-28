@@ -1,61 +1,53 @@
 import * as React from 'react';
 
-export default function CountryInfo() {
-  const [countryCode, setCountryCode] = React.useState('AU');
-  const [data, setData] = React.useState({
-    data: null,
-    isLoading: true,
-    error: null,
-  });
+function FieldNotes() {
+  const [notes, setNotes] = React.useState([
+    'Components encapsulate both the visual representation of a particular piece of UI as well as the state and logic that goes along with it.',
+    'The same intuition you have about creating and composing together functions can directly apply to creating and composing components. However, instead of composing functions together to get some value, you can compose components together to get some UI.',
+    'JSX combines the power and expressiveness of JavaScript with the readability and accessibility of HTML',
+    'Just like a component enabled the composition and reusability of UI, hooks enabled the composition and reusability of non-visual logic.',
+  ]);
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-    setCountryCode(value);
+  const notesRefs = React.useRef(null);
+  const otherRef = React.useRef(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const newNote = formData.get('note');
+    setNotes([...notes, newNote]);
   };
 
   React.useEffect(() => {
-    async function fetchData() {
-      const res = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }).then((r) => r.json());
-
-      return setData({ ...data, data: res[0], isLoading: false });
-    }
-    fetchData();
-  }, [countryCode, data]);
+    notesRefs.current.className = 'big';
+    otherRef.current.className = '';
+  }, [notes]);
 
   return (
-    <section>
-      <header>
-        <h1>Country Info:</h1>
-
-        <label htmlFor="country">Select a country:</label>
-        <div>
-          <select id="country" value={countryCode} onChange={handleChange}>
-            <option value="AU">Australia</option>
-            <option value="CA">Canada</option>
-            <option value="CN">China</option>
-            <option value="FR">France</option>
-            <option value="DE">Germany</option>
-            <option value="IN">India</option>
-            <option value="JP">Japan</option>
-            <option value="MX">Mexico</option>
-            <option value="GB">United Kingdom</option>
-            <option value="US">United States of America</option>
-          </select>
-          {data.isLoading && <span>Loading...</span>}
-          {data.error && <span>{data.error.message}</span>}
-        </div>
-      </header>
-      {data.data && (
-        <>
-          <p>Capital: {data.data.capital}</p>
-          <p>Population : {data.data.population.toLocaleString('ru-Ru')}</p>
-        </>
-      )}
-    </section>
+    <article>
+      <h1>Field Notes</h1>
+      <div>
+        <ul>
+          {notes.map((msg, index) => {
+            return (
+              <li key={index} ref={index === notes.length - 1 ? notesRefs : otherRef}>
+                {msg}
+              </li>
+            );
+          })}
+        </ul>
+        <form onSubmit={handleSubmit}>
+          <input required type="text" name="note" placeholder="Type your note..." />
+          <button className="link" type="submit">
+            Submit
+          </button>
+        </form>
+      </div>
+    </article>
   );
+}
+
+export default function App() {
+  return FieldNotes();
 }
