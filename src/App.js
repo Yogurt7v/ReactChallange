@@ -1,27 +1,59 @@
 import * as React from 'react';
 
-export default function FollowTheLeader() {
-  const [position, setPosition] = React.useState([0, 0]);
+const translations = {
+  en: {
+    hello: 'Hello!',
+    welcome: 'Welcome to our app!',
+  },
+  es: {
+    hello: '¡Hola!',
+    welcome: '¡Bienvenido a nuestra aplicación!',
+  },
+  fr: {
+    hello: 'Bonjour !',
+    welcome: 'Bienvenue dans notre application !',
+  },
+  de: {
+    hello: 'Hallo!',
+    welcome: 'Willkommen in unserer App!',
+  },
+};
 
-  const handleClick = (e) => {
-    setPosition([e.clientX, e.clientY]);
+const languageContext = React.createContext({
+  language: 'en',
+  changeLanguage: () => {},
+  translation: (key) => key,
+});
+
+function LanguageProvider() {
+  const [language, setLanguage] = React.useState(Object.keys(translations)[0]);
+  const [text, setText] = React.useState(Object.values(translations)[0]);
+
+  const changeLanguage = (e) => {
+    setLanguage(e.target.value);
   };
 
-  React.useEffect(() => {
-    document.addEventListener('mousedown', (e) => handleClick(e));
-
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [position]);
+  const translation = () => {
+    setText(translations[language]);
+  };
 
   return (
-    <div className="wrapper">
-      <div
-        className="box"
-        style={{
-          transform: `translate(${position[0]}px, ${position[1]}px)`,
-          transition: 'transform 1s',
-        }}
-      />
-    </div>
+    <>
+      <select
+        defaultValue={Object.keys(translations)[0]}
+        onChange={(e) => changeLanguage(e)}
+      >
+        {Object.keys(translations).map((item) => (
+          <option value={item}>{item}</option>
+        ))}
+      </select>
+      <div>{text.hello}</div>
+      <div>{text.welcome}</div>
+      <button onClick={translation}>Translate</button>
+    </>
   );
+}
+
+export default function App() {
+  return LanguageProvider();
 }
