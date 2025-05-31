@@ -1,28 +1,27 @@
 import * as React from 'react';
 
-export default function ExpandingTextarea() {
-  const [text, setText] = React.useState('');
-  const textZone = React.useRef(null);
+export default function FollowTheLeader() {
+  const [position, setPosition] = React.useState([0, 0]);
 
-  const handleChange = (e) => {
-    setText(e.target.value);
-    const textarea = textZone.current;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
+  const handleClick = (e) => {
+    setPosition([e.clientX, e.clientY]);
   };
 
+  React.useEffect(() => {
+    document.addEventListener('mousedown', (e) => handleClick(e));
+
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [position]);
+
   return (
-    <section className="container">
-      <h1>Expanding Textarea</h1>
-      <label htmlFor="textarea">Enter or paste in some text</label>
-      <textarea
-        ref={textZone}
-        id="textarea"
-        placeholder="Enter some text"
-        value={text}
-        onChange={handleChange}
-        rows={1}
+    <div className="wrapper">
+      <div
+        className="box"
+        style={{
+          transform: `translate(${position[0]}px, ${position[1]}px)`,
+          transition: 'transform 1s',
+        }}
       />
-    </section>
+    </div>
   );
 }
