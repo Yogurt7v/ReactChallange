@@ -26,7 +26,7 @@ const languageContext = React.createContext({
 });
 
 function LanguageProvider() {
-  const [language, setLanguage] = React.useState(Object.keys(translations)[0]);
+  const [language, setLanguage] = React.useState(languageContext.language);
   const [text, setText] = React.useState(Object.values(translations)[0]);
 
   const changeLanguage = (e) => {
@@ -39,10 +39,7 @@ function LanguageProvider() {
 
   return (
     <>
-      <select
-        defaultValue={Object.keys(translations)[0]}
-        onChange={(e) => changeLanguage(e)}
-      >
+      <select defaultValue={languageContext.language} onChange={(e) => changeLanguage(e)}>
         {Object.keys(translations).map((item) => (
           <option value={item}>{item}</option>
         ))}
