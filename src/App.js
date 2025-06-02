@@ -1,116 +1,70 @@
 import * as React from 'react';
 
-const initialFormData = {
-  name: '',
-  email: '',
-  address: '',
-  city: '',
-  zipcode: '',
-};
+function reducer(tasks, action) {
+  switch (action.type) {
+    case 'add':
+      return [...tasks, { id: tasks.length + 1, task: action.task }];
 
-export function MultistepFormReducer() {
-  const [currentStep, setCurrentStep] = React.useState(1);
-  const [formData, setFormData] = React.useState(initialFormData);
+    case 'update':
+      console.log('update', action.id);
+      console.log('update', tasks);
+      return tasks.map((item) =>
+        item.id === action.id ? { ...item, status: 'done' } : item
+      );
 
-  const handleNextStep = () => {
-    setCurrentStep(currentStep + 1);
+    case 'delete':
+      console.log('delete');
+      return tasks.filter((item) => item.id !== action.id);
+
+    default:
+      return tasks;
+  }
+}
+
+export default function TaskManager() {
+  const [tasks, dispatch] = React.useReducer(reducer, [{ id: 1, task: 'kcbakdjasbd' }]);
+
+  const createTask = (title) => {
+    return title;
   };
 
-  const handlePrevStep = () => {
-    setCurrentStep(currentStep - 1);
+  const handleUpdateTaskStatus = (id) => {
+    dispatch({ type: 'update', id });
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+  const handleDeleteTask = (id) => {
+    dispatch({ type: 'delete', id });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(JSON.stringify(formData));
-    setCurrentStep(1);
-    setFormData(initialFormData);
+    const form = document.getElementById('taskForm');
+    const formData = new FormData(form);
+    dispatch({ type: 'add', task: createTask(formData.get('task')) });
+
+    e.target.reset();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <p>Step {currentStep} of 3</p>
-      <progress value={currentStep} max={3}></progress>
+    <div>
+      <h1>Task Manager</h1>
+      <form onSubmit={handleSubmit} id="taskForm">
+        <input name="task" placeholder="Task title" />
+        <button className="primary" type="submit">
+          Add Task
+        </button>
+      </form>
 
-      {currentStep === 1 && (
-        <>
-          <div>
-            <label>Address</label>
-            <input
-              type="text"
-              id="address"
-              placeholder='Enter your address"'
-              onChange={(e) => handleChange(e)}
-            ></input>
-          </div>
-
-          <div>
-            <label>Email</label>
-            <input
-              type="email"
-              id="email"
-              placeholder='Enter your email"'
-              onChange={(e) => handleChange(e)}
-            ></input>
-          </div>
-        </>
-      )}
-
-      {currentStep === 2 && (
-        <>
-          <div>
-            <label>Name</label>
-            <input
-              type="text"
-              id="name"
-              placeholder='Enter your name"'
-              onChange={(e) => handleChange(e)}
-            ></input>
-          </div>
-
-          <div>
-            <label>City</label>
-            <input
-              type="text"
-              id="city"
-              placeholder='Enter your city"'
-              onChange={(e) => handleChange(e)}
-            ></input>
-          </div>
-
-          <div>
-            <label>Zipcode</label>
-            <input
-              type="number"
-              id="zipcode"
-              placeholder='Enter your zipcode"'
-              onChange={(e) => handleChange(e)}
-            ></input>
-          </div>
-        </>
-      )}
-
-      <div className="buttons">
-        {currentStep > 1 && (
-          <button onClick={handlePrevStep} type="button">
-            Prev
-          </button>
-        )}
-        {currentStep !== 3 && (
-          <button onClick={handleNextStep} type="button">
-            Next
-          </button>
-        )}
-        {currentStep === 3 && <button type="submit">Submit</button>}
-      </div>
-    </form>
+      <ol>
+        {tasks.map((item, index) => (
+          <>
+            <li key={item.index}>{item.task}</li>
+            <button onClick={() => handleUpdateTaskStatus(item.id)}>V</button>
+            <button onClick={() => handleDeleteTask(item.id)}>X</button>
+            {item.status === 'done' && <p>Done</p>}
+          </>
+        ))}
+      </ol>
+    </div>
   );
-}
-
-export default function App() {
-  return <div className="container">{MultistepFormReducer()}</div>;
 }
