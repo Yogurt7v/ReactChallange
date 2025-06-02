@@ -1,93 +1,116 @@
 import * as React from 'react';
 
-const videoPlaybackContext = React.createContext({
-  playingVideoId: null,
-  setPlayingVideoId: () => {},
-});
+const initialFormData = {
+  name: '',
+  email: '',
+  address: '',
+  city: '',
+  zipcode: '',
+};
 
-function VideoPlaybackProvider({ children }) {
-  const playingVideoId = null;
-  const setPlayingVideoId = () => {};
+export function MultistepFormReducer() {
+  const [currentStep, setCurrentStep] = React.useState(1);
+  const [formData, setFormData] = React.useState(initialFormData);
 
-  return children;
-}
+  const handleNextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
 
-function VideoItem({ videoId, title, poster, src }) {
-  const [videoIsActive, setVideoIsActive] = React.useState(false);
-  const video = React.useRef(null);
+  const handlePrevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
 
-  const handleTogglePlay = () => {
-    const player = video.current;
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
 
-    if (!videoIsActive) {
-      player.play();
-      setVideoIsActive(true);
-    }
-    if (videoIsActive) {
-      player.pause();
-      setVideoIsActive(false);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(JSON.stringify(formData));
+    setCurrentStep(1);
+    setFormData(initialFormData);
   };
 
   return (
-    <li>
-      <h3>{title}</h3>
-      <article>
-        <video poster={poster} ref={video}>
-          <source src={src} type="video/mp4" />
-        </video>
-        <button title={videoIsActive ? 'Pause' : 'Play'} onClick={handleTogglePlay}>
-          {videoIsActive ? '⏸' : '▶'}
-        </button>
-      </article>
-    </li>
-  );
-}
+    <form onSubmit={handleSubmit}>
+      <p>Step {currentStep} of 3</p>
+      <progress value={currentStep} max={3}></progress>
 
-function NewsFeed() {
-  const videos = [
-    {
-      id: 1,
-      title: 'The React Way',
-      poster: 'https://react.gg/img/visualized-og2.jpg',
-      src: 'https://stream.mux.com/TbVCJiOghmISJgg4AznPfFHYRfiVoek8OJHF56Y01oR4/high.mp4',
-    },
-    {
-      id: 2,
-      title: 'The History of the Web',
-      poster: 'https://react.gg/img/visualized-og1.jpg',
-      src: 'https://stream.mux.com/EwJPlEBa0046jGSVdYOnRsX9WnqHjytgIBXwkOt7LvVg/high.mp4',
-    },
-    {
-      id: 3,
-      title: 'Rendering, Visualized',
-      poster: 'https://react.gg/img/visualized-og5.jpg',
-      src: 'https://stream.mux.com/VvQKMwPEOq5BUnc9eRN4sL5sUEZrHqWxNlCbpXSkE3I/high.mp4',
-    },
-  ];
+      {currentStep === 1 && (
+        <>
+          <div>
+            <label>Address</label>
+            <input
+              type="text"
+              id="address"
+              placeholder='Enter your address"'
+              onChange={(e) => handleChange(e)}
+            ></input>
+          </div>
 
-  return (
-    <div>
-      <h1>News Feed</h1>
-      <ul>
-        {videos.map((item) => (
-          <VideoItem
-            key={item.id}
-            videoId={item.id}
-            title={item.title}
-            poster={item.poster}
-            src={item.src}
-          />
-        ))}
-      </ul>
-    </div>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              id="email"
+              placeholder='Enter your email"'
+              onChange={(e) => handleChange(e)}
+            ></input>
+          </div>
+        </>
+      )}
+
+      {currentStep === 2 && (
+        <>
+          <div>
+            <label>Name</label>
+            <input
+              type="text"
+              id="name"
+              placeholder='Enter your name"'
+              onChange={(e) => handleChange(e)}
+            ></input>
+          </div>
+
+          <div>
+            <label>City</label>
+            <input
+              type="text"
+              id="city"
+              placeholder='Enter your city"'
+              onChange={(e) => handleChange(e)}
+            ></input>
+          </div>
+
+          <div>
+            <label>Zipcode</label>
+            <input
+              type="number"
+              id="zipcode"
+              placeholder='Enter your zipcode"'
+              onChange={(e) => handleChange(e)}
+            ></input>
+          </div>
+        </>
+      )}
+
+      <div className="buttons">
+        {currentStep > 1 && (
+          <button onClick={handlePrevStep} type="button">
+            Prev
+          </button>
+        )}
+        {currentStep !== 3 && (
+          <button onClick={handleNextStep} type="button">
+            Next
+          </button>
+        )}
+        {currentStep === 3 && <button type="submit">Submit</button>}
+      </div>
+    </form>
   );
 }
 
 export default function App() {
-  return (
-    <VideoPlaybackProvider>
-      <NewsFeed />
-    </VideoPlaybackProvider>
-  );
+  return <div className="container">{MultistepFormReducer()}</div>;
 }

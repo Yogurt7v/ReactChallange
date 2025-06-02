@@ -1,17 +1,45 @@
-body {
-  cursor: crosshair;
+/* Your CSS goes here */
+
+h1 {
+  text-align: center;
 }
 
-.wrapper {
+progress {
+  accent-color: var(--yellow);
+  width: 100%;
+}
+
+form {
+  display: grid;
+  gap: 16px;
+}
+
+button {
+  width: 100%;
+}
+
+table {
+  font-size: 14px;
+  font-family: monospace;
   position: relative;
-  width: 100dvw;
-  height: 100dvh;
+  width: 100%;
+  border: 1px solid var(--charcoal);
 }
 
-.box {
-  width: 50px;
-  height: 50px;
-  position: absolute;
-  background: var(--yellow);
-  transition: background 0.1s ease;
+thead th:not(:first-child) {
+  text-align: left;
+}
+
+th,
+td {
+  padding: 4px 8px;
+}
+
+th {
+  background: var(--charcoal);
+}
+
+td {
+  border: 1px solid var(--charcoal);
+  width: 100%;
 }
