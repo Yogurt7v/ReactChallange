@@ -1,123 +1,84 @@
 import * as React from 'react';
 
-const products = [
-  { id: 1, name: 'Poké Ball', price: 10 },
-  { id: 2, name: 'Great Ball', price: 20 },
-  { id: 3, name: 'Ultra Ball', price: 30 },
-];
+const initialState = {
+  past: [],
+  present: 0,
+  future: [],
+};
 
-function calculateTotal(cart) {
-  const parsedItems = Array.isArray(cart) ? cart : [];
-  const total = parsedItems.reduce(
-    (current, item) => current + item.price * item.count,
-    0
-  );
-  return total;
-}
+function reducer(state, action) {
+  const { past, present, future } = state;
 
-const initialState = [];
-
-function reducer(cart, action) {
   switch (action.type) {
-    case 'add': {
-      const inCart = Boolean(cart.find((item) => item.id === action.id));
+    case 'inc':
+      console.log(state.past);
+      return {
+        past: past.length > 0 ? [...past, present + 1] : past.push(present),
+        present: present + 1,
+        future: [],
+      };
+    case 'desc':
+      console.log(state.past);
+      return {
+        past: past.length > 0 ? [...past, present - 1] : past.pop(present),
+        present: present - 1,
+        future: [],
+      };
 
-      if (!inCart) {
-        const add = products.find((item) => item.id === action.id);
-        return [...cart, { ...add, count: 1 }];
-      } else {
-        return cart.map((item) =>
-          item.id === action.id ? { ...item, count: item.count++ } : item
-        );
-      }
-    }
-
-    case 'update': {
-      if (action.adjustment === 'decrement') {
-        return cart
-          .map((item) =>
-            item.id === action.id && item.count > 0
-              ? { ...item, count: item.count - 1 }
-              : item
-          )
-          .filter((item) => item.count > 0);
-      }
-      if (action.adjustment === 'increment') {
-        return cart.map((item) =>
-          item.id === action.id ? { ...item, count: item.count + 1 } : item
-        );
-      }
-      break;
-    }
-    default:
-      return cart;
+    case 'undo':
+      console.log(state.past);
+      return {
+        past: [...past],
+        present: past.length ? past[past.length - 1] : 0,
+        future: [...future, present],
+      };
+    case 'redo':
+      console.log(state.past);
+      return {
+        past: [...past, present],
+        present: future.length ? future[future.length++] : 0,
+        future: [...future],
+      };
   }
 }
 
-export function ShoppingCart() {
-  const [cart, dispatch] = React.useReducer(reducer, initialState);
+export function CounterWithUndoRedo() {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
 
-  const handleAddToCart = (id) => {
-    dispatch({ type: 'add', id });
+  const handleIncrement = () => {
+    dispatch({ type: 'inc' });
   };
-  const handleUpdateQuantity = (id, adjustment) => {
-    dispatch({
-      type: 'update',
-      id,
-      adjustment,
-    });
+  const handleDecrement = () => {
+    dispatch({ type: 'desc' });
   };
-
-  React.useEffect(() => {
-    calculateTotal(cart);
-  }, [cart]);
+  const handleUndo = () => {
+    dispatch({ type: 'undo' });
+  };
+  const handleRedo = () => {
+    dispatch({ type: 'redo' });
+  };
 
   return (
-    <main>
-      <h1>Poké Mart</h1>
-      <section>
-        <div>
-          <ul className="products">
-            {products.map((item) => (
-              <li key={item.id}>
-                {item.name} - {item.price} $
-                <button className="primary" onClick={() => handleAddToCart(item.id)}>
-                  Add to Chart
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      <br />
-      <aside>
-        <div>
-          <h2>Shopping Chart</h2>
-          <ul>
-            {cart.map((item) => (
-              <li key={item.id}>
-                {item.name} - {item.count}
-                <div>
-                  <button onClick={() => handleUpdateQuantity(item.id, 'decrement')}>
-                    -
-                  </button>
-                  {item.quantity}
-                  <button onClick={() => handleUpdateQuantity(item.id, 'increment')}>
-                    +
-                  </button>
-                </div>
-              </li>
-            ))}
-            {!cart.length && <li>Cart is empty</li>}
-          </ul>
-        </div>
-      </aside>
-      <br />
-      <div>Total - {calculateTotal(cart)}$</div>
-    </main>
+    <>
+      <h1>Counter: {state.present}</h1>
+      <div className="container">
+        <button className="link" onClick={handleIncrement}>
+          Increment
+        </button>
+        <button className="link" onClick={handleDecrement}>
+          Decrement
+        </button>
+        <button className="link" onClick={handleUndo} disabled={!state.past.length}>
+          Undo
+        </button>
+        <button className="link" onClick={handleRedo} disabled={!state.past.length}>
+          Redo
+        </button>
+      </div>
+    </>
   );
 }
 
 export default function App() {
-  return ShoppingCart();
+  return CounterWithUndoRedo();
 }
