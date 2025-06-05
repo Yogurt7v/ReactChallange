@@ -1,84 +1,69 @@
 import * as React from 'react';
+import { fetchData } from './utils';
 
-const initialState = {
-  past: [],
-  present: 0,
-  future: [],
-};
+export function DataTable() {
+  const [data, setData] = React.useState([]);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [sortOrder, setSortOrder] = React.useState('asc');
 
-function reducer(state, action) {
-  const { past, present, future } = state;
-
-  switch (action.type) {
-    case 'inc':
-      console.log(state.past);
-      return {
-        past: past.length > 0 ? [...past, present + 1] : past.push(present),
-        present: present + 1,
-        future: [],
-      };
-    case 'desc':
-      console.log(state.past);
-      return {
-        past: past.length > 0 ? [...past, present - 1] : past.pop(present),
-        present: present - 1,
-        future: [],
-      };
-
-    case 'undo':
-      console.log(state.past);
-      return {
-        past: [...past],
-        present: past.length ? past[past.length - 1] : 0,
-        future: [...future, present],
-      };
-    case 'redo':
-      console.log(state.past);
-      return {
-        past: [...past, present],
-        present: future.length ? future[future.length++] : 0,
-        future: [...future],
-      };
-  }
-}
-
-export function CounterWithUndoRedo() {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
-
-  const handleIncrement = () => {
-    dispatch({ type: 'inc' });
+  const handleHeaderClick = () => {
+    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
   };
-  const handleDecrement = () => {
-    dispatch({ type: 'desc' });
-  };
-  const handleUndo = () => {
-    dispatch({ type: 'undo' });
-  };
-  const handleRedo = () => {
-    dispatch({ type: 'redo' });
-  };
+
+  React.useEffect(() => {
+    let result = fetchData();
+
+    if (searchTerm) {
+      result = result.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (sortOrder === 'asc') {
+      result.sort((a, b) => a.id - b.id);
+    } else if (sortOrder === 'desc') {
+      result.sort((a, b) => b.id - a.id);
+    }
+
+    setData(result);
+  }, [sortOrder, searchTerm, setSortOrder]);
 
   return (
-    <>
-      <h1>Counter: {state.present}</h1>
-      <div className="container">
-        <button className="link" onClick={handleIncrement}>
-          Increment
-        </button>
-        <button className="link" onClick={handleDecrement}>
-          Decrement
-        </button>
-        <button className="link" onClick={handleUndo} disabled={!state.past.length}>
-          Undo
-        </button>
-        <button className="link" onClick={handleRedo} disabled={!state.past.length}>
-          Redo
-        </button>
-      </div>
-    </>
+    <div>
+      <header>
+        <input
+          placeholder="Search items"
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        ></input>
+        <button className="secondary">Toggle Columns</button>
+      </header>
+      <table border="1" cellPadding="8" cellSpacing="0">
+        <thead>
+          <tr>
+            <th>
+              <button id="id" onClick={() => handleHeaderClick()}>
+                ID
+              </button>
+            </th>
+            <th id="name">Name</th>
+            <th id="name">Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={row.id}>
+              <td>{row.id}</td>
+              <td>{row.name}</td>
+              <td>{row.weight}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 export default function App() {
-  return CounterWithUndoRedo();
+  return DataTable();
 }
