@@ -11,34 +11,32 @@ function reducer(state, action) {
 
   switch (action.type) {
     case 'inc':
-      console.log(state.past);
       return {
-        past: past.length > 0 ? [...past, present + 1] : past.push(present),
+        past: [...past, present],
         present: present + 1,
         future: [],
       };
     case 'desc':
-      console.log(state.past);
       return {
-        past: past.length > 0 ? [...past, present - 1] : past.pop(present),
+        past: [...past, present],
         present: present - 1,
         future: [],
       };
 
     case 'undo':
-      console.log(state.past);
       return {
-        past: [...past],
-        present: past.length ? past[past.length - 1] : 0,
-        future: [...future, present],
+        past: past.slice(0, -1),
+        present: past.at(-1),
+        future: [present, ...future],
       };
     case 'redo':
-      console.log(state.past);
       return {
         past: [...past, present],
-        present: future.length ? future[future.length++] : 0,
-        future: [...future],
+        present: future[0],
+        future: future.slice(1),
       };
+    default:
+      return;
   }
 }
 
@@ -71,7 +69,7 @@ export function CounterWithUndoRedo() {
         <button className="link" onClick={handleUndo} disabled={!state.past.length}>
           Undo
         </button>
-        <button className="link" onClick={handleRedo} disabled={!state.past.length}>
+        <button className="link" onClick={handleRedo} disabled={!state.future.length}>
           Redo
         </button>
       </div>
