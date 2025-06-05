@@ -1,82 +1,50 @@
 import * as React from 'react';
 
-const initialState = {
-  past: [],
-  present: 0,
-  future: [],
-};
+export function LocalizedPrimeNumbers() {
+  const [count, setCount] = React.useState(1);
+  const [locale, setLocal] = React.useState('en-US');
 
-function reducer(state, action) {
-  const { past, present, future } = state;
+  const translations = {
+    'en-US': {
+      nextPrime: `фраза по английски ${count}, ${count + 1}`,
+    },
+    'es-ES': {
+      nextPrime: `фраза по испански ${count}, ${count + 1}`,
+    },
+  };
 
-  switch (action.type) {
-    case 'inc':
-      return {
-        past: [...past, present],
-        present: present + 1,
-        future: [],
-      };
-    case 'desc':
-      return {
-        past: [...past, present],
-        present: present - 1,
-        future: [],
-      };
+  const handleClick = () => {
+    setCount(count + 1);
+  };
 
-    case 'undo':
-      return {
-        past: past.slice(0, -1),
-        present: past.at(-1),
-        future: [present, ...future],
-      };
-    case 'redo':
-      return {
-        past: [...past, present],
-        present: future[0],
-        future: future.slice(1),
-      };
-    default:
-      return;
+  const handleLocaleChange = (e) => {
+    setLocal(e.target.value);
+  };
+  function calculatePrime(num) {
+    return num++;
   }
-}
+  function formatNumberToString(count, locale) {
+    return count.toLocaleString(locale);
+  }
 
-export function CounterWithUndoRedo() {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
-
-  const handleIncrement = () => {
-    dispatch({ type: 'inc' });
-  };
-  const handleDecrement = () => {
-    dispatch({ type: 'desc' });
-  };
-  const handleUndo = () => {
-    dispatch({ type: 'undo' });
-  };
-  const handleRedo = () => {
-    dispatch({ type: 'redo' });
-  };
+  const nthprime = calculatePrime(count);
 
   return (
-    <>
-      <h1>Counter: {state.present}</h1>
-      <div className="container">
-        <button className="link" onClick={handleIncrement}>
-          Increment
+    <div>
+      <header>
+        <select value={locale} onChange={handleLocaleChange}>
+          <option value="en-US">English (US)</option>
+          <option value="es-ES">Español (ES)</option>
+        </select>
+
+        <button className="primary" onClick={handleClick}>
+          {translations[locale].nextPrime}
         </button>
-        <button className="link" onClick={handleDecrement}>
-          Decrement
-        </button>
-        <button className="link" onClick={handleUndo} disabled={!state.past.length}>
-          Undo
-        </button>
-        <button className="link" onClick={handleRedo} disabled={!state.future.length}>
-          Redo
-        </button>
-      </div>
-    </>
+      </header>
+    </div>
   );
 }
 
 export default function App() {
-  return CounterWithUndoRedo();
+  return LocalizedPrimeNumbers();
 }
