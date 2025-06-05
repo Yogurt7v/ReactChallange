@@ -1,50 +1,69 @@
 import * as React from 'react';
+import { fetchData } from './utils';
 
-export function LocalizedPrimeNumbers() {
-  const [count, setCount] = React.useState(1);
-  const [locale, setLocal] = React.useState('en-US');
+export function DataTable() {
+  const [data, setData] = React.useState([]);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [sortOrder, setSortOrder] = React.useState('asc');
 
-  const translations = {
-    'en-US': {
-      nextPrime: `фраза по английски ${count}, ${count + 1}`,
-    },
-    'es-ES': {
-      nextPrime: `фраза по испански ${count}, ${count + 1}`,
-    },
+  const handleHeaderClick = () => {
+    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
-  const handleClick = () => {
-    setCount(count + 1);
-  };
+  React.useEffect(() => {
+    let result = fetchData();
 
-  const handleLocaleChange = (e) => {
-    setLocal(e.target.value);
-  };
-  function calculatePrime(num) {
-    return num++;
-  }
-  function formatNumberToString(count, locale) {
-    return count.toLocaleString(locale);
-  }
+    if (searchTerm) {
+      result = result.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (sortOrder === 'asc') {
+      result.sort((a, b) => a.id - b.id);
+    } else if (sortOrder === 'desc') {
+      result.sort((a, b) => b.id - a.id);
+    }
 
-  const nthprime = calculatePrime(count);
+    setData(result);
+  }, [sortOrder, searchTerm, setSortOrder]);
 
   return (
     <div>
       <header>
-        <select value={locale} onChange={handleLocaleChange}>
-          <option value="en-US">English (US)</option>
-          <option value="es-ES">Español (ES)</option>
-        </select>
-
-        <button className="primary" onClick={handleClick}>
-          {translations[locale].nextPrime}
-        </button>
+        <input
+          placeholder="Search items"
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        ></input>
+        <button className="secondary">Toggle Columns</button>
       </header>
+      <table border="1" cellPadding="8" cellSpacing="0">
+        <thead>
+          <tr>
+            <th>
+              <button id="id" onClick={() => handleHeaderClick()}>
+                ID
+              </button>
+            </th>
+            <th id="name">Name</th>
+            <th id="name">Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={row.id}>
+              <td>{row.id}</td>
+              <td>{row.name}</td>
+              <td>{row.weight}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 export default function App() {
-  return LocalizedPrimeNumbers();
+  return DataTable();
 }
