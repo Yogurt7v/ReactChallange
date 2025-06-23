@@ -1,69 +1,38 @@
 import * as React from 'react';
-import { fetchData } from './utils';
 
-export function DataTable() {
-  const [data, setData] = React.useState([]);
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [sortOrder, setSortOrder] = React.useState('asc');
+function ChildComponent({ children, onClick }) {
+  console.count('Child component is rendering');
 
-  const handleHeaderClick = () => {
-    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-  };
+  return <button onClick={onClick}>{children}</button>;
+}
+
+const MemoizedChildComponent = React.memo(ChildComponent);
+
+export default function ParentComponent() {
+  const [time, setTime] = React.useState(new Date().toLocaleTimeString());
+  const [count, setCount] = React.useState(0);
 
   React.useEffect(() => {
-    let result = fetchData();
+    const timer = setInterval(() => {
+      setTime(new Date().toLocaleTimeString());
+    }, 1000);
 
-    if (searchTerm) {
-      result = result.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    if (sortOrder === 'asc') {
-      result.sort((a, b) => a.id - b.id);
-    } else if (sortOrder === 'desc') {
-      result.sort((a, b) => b.id - a.id);
-    }
+    return () => {
+      clearInterval(timer);
+    };
+  }, [count]);
 
-    setData(result);
-  }, [sortOrder, searchTerm, setSortOrder]);
+  const handleIncrementCount = React.useCallback(() => {
+    setCount((prev) => prev + 1);
+  }, []);
 
   return (
     <div>
-      <header>
-        <input
-          placeholder="Search items"
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        ></input>
-        <button className="secondary">Toggle Columns</button>
-      </header>
-      <table border="1" cellPadding="8" cellSpacing="0">
-        <thead>
-          <tr>
-            <th>
-              <button id="id" onClick={() => handleHeaderClick()}>
-                ID
-              </button>
-            </th>
-            <th id="name">Name</th>
-            <th id="name">Weight</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={row.id}>
-              <td>{row.id}</td>
-              <td>{row.name}</td>
-              <td>{row.weight}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <p>Current time: {time}</p>
+      <p>Count: {count}</p>
+      <MemoizedChildComponent onClick={handleIncrementCount}>
+        Increment Count
+      </MemoizedChildComponent>
     </div>
   );
-}
-
-export default function App() {
-  return DataTable();
 }
