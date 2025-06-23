@@ -1,28 +1,37 @@
 import * as React from 'react';
 
-export default function ReactRuler() {
-  const [width, setWidth] = React.useState(0);
+const query = 'only screen and (max-width : 768px)';
 
-  const ref = React.useRef(null);
+export default function MatchMedia() {
+  const [isMobile, setIsMobile] = React.useState(window.matchMedia(query).matches);
 
   React.useLayoutEffect(() => {
-    const observer = new ResizeObserver(([entry]) => {
-      setWidth(entry.borderBoxSize[0].inlineSize);
-    });
+    const handleChange = () => {
+      setIsMobile(window.matchMedia(query).matches);
+    };
 
-    observer.observe(ref.current);
+    const matchMedia = window.matchMedia(query);
+
+    matchMedia.addEventListener('change', handleChange);
 
     return () => {
-      observer.disconnect();
+      matchMedia.removeEventListener('change', handleChange);
     };
   }, []);
 
   return (
     <section>
-      <h1>React Ruler</h1>
-      <p>(Resize the ruler)</p>
-      <article ref={ref}>
-        <label>width: {Math.floor(width)}</label>
+      Resize your browser's window to see changes.
+      <article>
+        <figure className={isMobile ? 'active' : ''}>
+          phone
+          <figcaption>Is mobile: {`${isMobile}`}</figcaption>
+        </figure>
+
+        <figure className={!isMobile ? 'active' : ''}>
+          desktop
+          <figcaption>Is larger device: {`${!isMobile}`}</figcaption>
+        </figure>
       </article>
     </section>
   );
