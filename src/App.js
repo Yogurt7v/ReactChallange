@@ -1,38 +1,29 @@
 import * as React from 'react';
 
-function ChildComponent({ children, onClick }) {
-  console.count('Child component is rendering');
+export default function ReactRuler() {
+  const [width, setWidth] = React.useState(0);
 
-  return <button onClick={onClick}>{children}</button>;
-}
+  const ref = React.useRef(null);
 
-const MemoizedChildComponent = React.memo(ChildComponent);
+  React.useLayoutEffect(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      setWidth(entry.borderBoxSize[0].inlineSize);
+    });
 
-export default function ParentComponent() {
-  const [time, setTime] = React.useState(new Date().toLocaleTimeString());
-  const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date().toLocaleTimeString());
-    }, 1000);
+    observer.observe(ref.current);
 
     return () => {
-      clearInterval(timer);
+      observer.disconnect();
     };
-  }, [count]);
-
-  const handleIncrementCount = React.useCallback(() => {
-    setCount((prev) => prev + 1);
   }, []);
 
   return (
-    <div>
-      <p>Current time: {time}</p>
-      <p>Count: {count}</p>
-      <MemoizedChildComponent onClick={handleIncrementCount}>
-        Increment Count
-      </MemoizedChildComponent>
-    </div>
+    <section>
+      <h1>React Ruler</h1>
+      <p>(Resize the ruler)</p>
+      <article ref={ref}>
+        <label>width: {Math.floor(width)}</label>
+      </article>
+    </section>
   );
 }
