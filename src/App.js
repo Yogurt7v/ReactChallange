@@ -1,38 +1,42 @@
 import * as React from 'react';
 
-const query = 'only screen and (max-width : 768px)';
+export function useDocumentTitle(newTitle) {
+  const [title, setTitle] = React.useState('First title');
 
-export default function MatchMedia() {
-  const [isMobile, setIsMobile] = React.useState(window.matchMedia(query).matches);
+  const changeTitle = (newTitle) => {
+    setTitle(newTitle);
+  };
 
-  React.useLayoutEffect(() => {
-    const handleChange = () => {
-      setIsMobile(window.matchMedia(query).matches);
-    };
+  return {
+    title,
+    changeTitle,
+  };
+}
 
-    const matchMedia = window.matchMedia(query);
+export default function App() {
+  const [inputValue, setInputValue] = React.useState('');
+  const [count, setCount] = React.useState(0);
+  const { title, changeTitle } = useDocumentTitle();
 
-    matchMedia.addEventListener('change', handleChange);
-
-    return () => {
-      matchMedia.removeEventListener('change', handleChange);
-    };
-  }, []);
+  const clickButton = (secondValue) => {
+    if (!secondValue) {
+      setCount((prev) => prev + 1);
+    } else {
+      changeTitle(secondValue);
+      setCount((prev) => prev + 1);
+    }
+  };
 
   return (
-    <section>
-      Resize your browser's window to see changes.
-      <article>
-        <figure className={isMobile ? 'active' : ''}>
-          phone
-          <figcaption>Is mobile: {`${isMobile}`}</figcaption>
-        </figure>
-
-        <figure className={!isMobile ? 'active' : ''}>
-          desktop
-          <figcaption>Is larger device: {`${!isMobile}`}</figcaption>
-        </figure>
-      </article>
-    </section>
+    <>
+      <h2>{title}</h2>
+      <input
+        type="text"
+        placeholder="new value"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+      ></input>
+      <button onClick={() => clickButton(inputValue)}>Increment count: {count}</button>
+    </>
   );
 }
