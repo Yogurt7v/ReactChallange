@@ -1,27 +1,24 @@
 import * as React from 'react';
-import { useDocumentTitle } from '@uidotdev/usehooks';
+
+export function useDocumentTitle(newTitle) {
+  React.useEffect(() => {
+    document.title = newTitle;
+  }, [newTitle]);
+}
 
 export default function App() {
   const [count, setCount] = React.useState(0);
+  useDocumentTitle(`new title ${count}`);
 
-  useDocumentTitle(`Clicked ${count} times.`);
+  const click = () => {
+    setCount((prev) => prev + 1);
+  };
 
   return (
-    <section>
-      <h1>useDocumentTitle</h1>
-      <h6>
-        <a
-          className="link"
-          href="https://6vmc1n.csb.app/"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Try in a new tab
-        </a>
-      </h6>
-      <button className="primary" onClick={() => setCount(count + 1)}>
-        Increment Count: {count}
-      </button>
-    </section>
+    <>
+      <h2>Change title! Look! {count}</h2>
+      <button onClick={() => click(count)}>Increment count: {count}</button>
+      <button onClick={() => setCount(0)}>Reset</button>
+    </>
   );
 }
