@@ -1,24 +1,48 @@
-import * as React from 'react';
+import { useState } from 'react';
 
-export function useDocumentTitle(newTitle) {
-  React.useEffect(() => {
-    document.title = newTitle;
-  }, [newTitle]);
+export function useDefault(initialState, defaultState) {
+  const [value, setValue] = useState(initialState);
+  if (!value) {
+    return [defaultState, setValue];
+  } else {
+    return [value, setValue];
+  }
 }
 
 export default function App() {
-  const [count, setCount] = React.useState(0);
-  useDocumentTitle(`new title ${count}`);
+  const initialState = { name: 'Tyler' };
+  const defaultState = { name: 'Ben' };
 
-  const click = () => {
-    setCount((prev) => prev + 1);
-  };
+  const [user, setUser] = useDefault(initialState, defaultState);
 
   return (
-    <>
-      <h2>Change title! Look! {count}</h2>
-      <button onClick={() => click(count)}>Increment count: {count}</button>
-      <button onClick={() => setCount(0)}>Reset</button>
-    </>
+    <section>
+      <h1>useDefault</h1>
+
+      <button
+        title="Sets the value to Lynn"
+        className="link"
+        onClick={() => setUser({ name: 'Lynn' })}
+      >
+        Lynn
+      </button>
+      <button
+        title="Sets the value to Tyler"
+        className="link"
+        onClick={() => setUser({ name: 'Tyler' })}
+      >
+        Tyler
+      </button>
+      <button
+        title="Sets the value to null causing it to use the default value"
+        className="link"
+        onClick={() => setUser(null)}
+      >
+        null
+      </button>
+      <pre>
+        <code>{JSON.stringify(user)}</code>
+      </pre>
+    </section>
   );
 }
