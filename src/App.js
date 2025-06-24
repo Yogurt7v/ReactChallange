@@ -1,42 +1,27 @@
 import * as React from 'react';
-
-export function useDocumentTitle(newTitle) {
-  const [title, setTitle] = React.useState('First title');
-
-  const changeTitle = (newTitle) => {
-    setTitle(newTitle);
-  };
-
-  return {
-    title,
-    changeTitle,
-  };
-}
+import { useDocumentTitle } from '@uidotdev/usehooks';
 
 export default function App() {
-  const [inputValue, setInputValue] = React.useState('');
   const [count, setCount] = React.useState(0);
-  const { title, changeTitle } = useDocumentTitle();
 
-  const clickButton = (secondValue) => {
-    if (!secondValue) {
-      setCount((prev) => prev + 1);
-    } else {
-      changeTitle(secondValue);
-      setCount((prev) => prev + 1);
-    }
-  };
+  useDocumentTitle(`Clicked ${count} times.`);
 
   return (
-    <>
-      <h2>{title}</h2>
-      <input
-        type="text"
-        placeholder="new value"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      ></input>
-      <button onClick={() => clickButton(inputValue)}>Increment count: {count}</button>
-    </>
+    <section>
+      <h1>useDocumentTitle</h1>
+      <h6>
+        <a
+          className="link"
+          href="https://6vmc1n.csb.app/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Try in a new tab
+        </a>
+      </h6>
+      <button className="primary" onClick={() => setCount(count + 1)}>
+        Increment Count: {count}
+      </button>
+    </section>
   );
 }
