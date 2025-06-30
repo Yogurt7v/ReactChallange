@@ -1,62 +1,46 @@
 import * as React from 'react';
 
-export function useToggle(initialValue = true) {
-  const [on, setOn] = React.useState(() => {
-    if (typeof initialValue === Boolean) {
-      return initialValue;
-    }
+export function usePrevious(newColor) {
+  const [color, setColor] = React.useState();
+  const ref = React.useRef();
 
-    return Boolean(initialValue);
-  });
+  React.useEffect(() => {
+    ref.current = color;
+    setColor(newColor);
+  }, [color, newColor]);
 
-  const toggle = (value) => {
-    if (typeof value === Boolean) {
-      return setOn(value);
-    }
-    return setOn((v) => !v);
-  };
-
-  return [on, toggle];
+  return ref.current;
 }
 
-function ToggleDemo({ on, toggle }) {
-  return (
-    <div>
-      <label className="toggle">
-        <input
-          onChange={toggle}
-          className="toggle-checkbox"
-          type="checkbox"
-          checked={on}
-        />
-        <div className="toggle-switch"></div>
-        <span className="toggle-label">{on ? 'On' : 'Off'}</span>
-      </label>
-    </div>
-  );
+function getRandomColor() {
+  const colors = ['green', 'blue', 'purple', 'red', 'pink'];
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 
 export default function App() {
-  const [on, toggle] = useToggle(true);
+  const [color, setColor] = React.useState(getRandomColor());
+  const previousColor = usePrevious(color);
+
+  const handleClick = () => {
+    setColor(getRandomColor());
+  };
 
   return (
-    <>
-      <section>
-        <h1>UseToggle</h1>
-        <button disabled={on} className="link" onClick={() => toggle(true)}>
-          Turn On
-        </button>
-        <button disabled={!on} className="link" onClick={() => toggle(false)}>
-          Turn Off
-        </button>
-        <button className="link" onClick={toggle}>
-          Toggle
-        </button>
-        <button className="link" onClick={() => toggle(!on)}>
-          (Also toggles)
-        </button>
-        <ToggleDemo toggle={toggle} on={on} />
-      </section>
-    </>
+    <section>
+      <h1>usePrevious</h1>
+      <button className="link" onClick={handleClick}>
+        Next
+      </button>
+      <article>
+        <figure>
+          <p style={{ background: `var(--${previousColor})` }} />
+          <figcaption>Previous: {previousColor}</figcaption>
+        </figure>
+        <figure>
+          <p style={{ background: `var(--${color})` }} />
+          <figcaption>Current: {color}</figcaption>
+        </figure>
+      </article>
+    </section>
   );
 }
