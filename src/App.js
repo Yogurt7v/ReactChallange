@@ -7,7 +7,7 @@ export function usePrevious(newColor) {
   React.useEffect(() => {
     ref.current = color;
     setColor(newColor);
-  }, [color, newColor]);
+  }, [newColor]);
 
   return ref.current;
 }
@@ -31,7 +31,7 @@ function getRandomColor() {
 
 export default function App() {
   const [color, setColor] = React.useState(getRandomColor());
-  const previousColor = usePrevious2(color);
+  const previousColor = usePrevious(color);
 
   const handleClick = () => {
     setColor(getRandomColor());
