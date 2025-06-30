@@ -1,48 +1,62 @@
-import { useState } from 'react';
+import * as React from 'react';
 
-export function useDefault(initialState, defaultState) {
-  const [value, setValue] = useState(initialState);
-  if (!value) {
-    return [defaultState, setValue];
-  } else {
-    return [value, setValue];
-  }
+export function useToggle(initialValue = true) {
+  const [on, setOn] = React.useState(() => {
+    if (typeof initialValue === Boolean) {
+      return initialValue;
+    }
+
+    return Boolean(initialValue);
+  });
+
+  const toggle = (value) => {
+    if (typeof value === Boolean) {
+      return setOn(value);
+    }
+    return setOn((v) => !v);
+  };
+
+  return [on, toggle];
+}
+
+function ToggleDemo({ on, toggle }) {
+  return (
+    <div>
+      <label className="toggle">
+        <input
+          onChange={toggle}
+          className="toggle-checkbox"
+          type="checkbox"
+          checked={on}
+        />
+        <div className="toggle-switch"></div>
+        <span className="toggle-label">{on ? 'On' : 'Off'}</span>
+      </label>
+    </div>
+  );
 }
 
 export default function App() {
-  const initialState = { name: 'Tyler' };
-  const defaultState = { name: 'Ben' };
-
-  const [user, setUser] = useDefault(initialState, defaultState);
+  const [on, toggle] = useToggle(true);
 
   return (
-    <section>
-      <h1>useDefault</h1>
-
-      <button
-        title="Sets the value to Lynn"
-        className="link"
-        onClick={() => setUser({ name: 'Lynn' })}
-      >
-        Lynn
-      </button>
-      <button
-        title="Sets the value to Tyler"
-        className="link"
-        onClick={() => setUser({ name: 'Tyler' })}
-      >
-        Tyler
-      </button>
-      <button
-        title="Sets the value to null causing it to use the default value"
-        className="link"
-        onClick={() => setUser(null)}
-      >
-        null
-      </button>
-      <pre>
-        <code>{JSON.stringify(user)}</code>
-      </pre>
-    </section>
+    <>
+      <section>
+        <h1>UseToggle</h1>
+        <button disabled={on} className="link" onClick={() => toggle(true)}>
+          Turn On
+        </button>
+        <button disabled={!on} className="link" onClick={() => toggle(false)}>
+          Turn Off
+        </button>
+        <button className="link" onClick={toggle}>
+          Toggle
+        </button>
+        <button className="link" onClick={() => toggle(!on)}>
+          (Also toggles)
+        </button>
+        <ToggleDemo toggle={toggle} on={on} />
+      </section>
+    </>
   );
 }
