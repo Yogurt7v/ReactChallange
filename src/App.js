@@ -12,6 +12,18 @@ export function usePrevious(newColor) {
   return ref.current;
 }
 
+export function usePrevious2(newColor) {
+  const [color, setColor] = React.useState(newColor);
+  const [prevColor, setPrevColor] = React.useState();
+
+  if (newColor !== color) {
+    setPrevColor(color);
+    setColor(newColor);
+  }
+
+  return prevColor;
+}
+
 function getRandomColor() {
   const colors = ['green', 'blue', 'purple', 'red', 'pink'];
   return colors[Math.floor(Math.random() * colors.length)];
@@ -19,7 +31,7 @@ function getRandomColor() {
 
 export default function App() {
   const [color, setColor] = React.useState(getRandomColor());
-  const previousColor = usePrevious(color);
+  const previousColor = usePrevious2(color);
 
   const handleClick = () => {
     setColor(getRandomColor());
