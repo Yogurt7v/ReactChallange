@@ -1,35 +1,49 @@
 import * as React from 'react';
 
-const subscribe = (callback) => {
-  window.addEventListener('languagechange', callback);
-  return () => window.removeEventListener('languagechange', callback);
-};
-
-const getSnapshot = () => {
-  return navigator.language;
-};
-
-const getServerSnapshot = () => {
-  throw Error('usePreferredLanguage is a client only');
-};
-
-export function usePreferredLanguage() {
-  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export function useFavicon(newLink) {
+  React.useEffect(() => {
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.href = newLink;
+    }
+  }, [newLink]);
 }
 
 export default function App() {
-  const language = usePreferredLanguage();
-  const date = new Date().toLocaleString(`${language}`);
+  const [favicon, setFavicon] = React.useState(
+    'https://ui.dev/favicon/favicon-32x32.png'
+  );
+
+  useFavicon(favicon);
 
   return (
-    <>
-      <div className="container">
-        <h1>usePreferredLanguage</h1>
-        <div>
-          You can change your preferred language here - chrome://settings/languages
-        </div>
-        <div>{`The correct date format for ${language} is ${date}`}</div>
-      </div>
-    </>
+    <section>
+      <h1>useFavicon</h1>
+
+      <button
+        title="Set the favicon to Bytes' logo"
+        className="link"
+        onClick={() => setFavicon('https://bytes.dev/favicon/favicon-32x32.png')}
+      >
+        Bytes
+      </button>
+      <button
+        title="Set the favicon to React Newsletter's logo"
+        className="link"
+        onClick={() =>
+          setFavicon('https://reactnewsletter.com/favicon/favicon-32x32.png')
+        }
+      >
+        React Newsletter
+      </button>
+
+      <button
+        title="Set the favicon to uidotdev's logo"
+        className="link"
+        onClick={() => setFavicon('https://ui.dev/favicon/favicon-32x32.png')}
+      >
+        ui.dev
+      </button>
+    </section>
   );
 }
