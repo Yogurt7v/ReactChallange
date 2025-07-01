@@ -1,58 +1,34 @@
 import * as React from 'react';
 
-export function usePrevious(newColor) {
-  const [color, setColor] = React.useState();
-  const ref = React.useRef();
+export function usePreferredLanguage() {
+  const [lang, setLang] = React.useState(() => navigator.language);
+
+  const handler = () => setLang(navigator.language);
 
   React.useEffect(() => {
-    ref.current = color;
-    setColor(newColor);
-  }, [newColor]);
+    window.addEventListener('languagechange', handler);
 
-  return ref.current;
-}
+    return () => {
+      window.removeEventListener('languagechange', handler);
+    };
+  }, []);
 
-export function usePrevious2(newColor) {
-  const [color, setColor] = React.useState(newColor);
-  const [prevColor, setPrevColor] = React.useState();
-
-  if (newColor !== color) {
-    setPrevColor(color);
-    setColor(newColor);
-  }
-
-  return prevColor;
-}
-
-function getRandomColor() {
-  const colors = ['green', 'blue', 'purple', 'red', 'pink'];
-  return colors[Math.floor(Math.random() * colors.length)];
+  return lang;
 }
 
 export default function App() {
-  const [color, setColor] = React.useState(getRandomColor());
-  const previousColor = usePrevious(color);
-
-  const handleClick = () => {
-    setColor(getRandomColor());
-  };
+  const language = usePreferredLanguage();
+  const date = new Date().toLocaleString(`${language}`);
 
   return (
-    <section>
-      <h1>usePrevious</h1>
-      <button className="link" onClick={handleClick}>
-        Next
-      </button>
-      <article>
-        <figure>
-          <p style={{ background: `var(--${previousColor})` }} />
-          <figcaption>Previous: {previousColor}</figcaption>
-        </figure>
-        <figure>
-          <p style={{ background: `var(--${color})` }} />
-          <figcaption>Current: {color}</figcaption>
-        </figure>
-      </article>
-    </section>
+    <>
+      <div className="container">
+        <h1>usePreferredLanguage</h1>
+        <div>
+          You can change your preferred language here - chrome://settings/languages
+        </div>
+        <div>{`The correct date format for ${language} is ${date}`}</div>
+      </div>
+    </>
   );
 }
