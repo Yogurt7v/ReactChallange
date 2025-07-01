@@ -1,48 +1,35 @@
-import { useState } from 'react';
+import * as React from 'react';
 
-export function useDefault(initialState, defaultState) {
-  const [value, setValue] = useState(initialState);
-  if (!value) {
-    return [defaultState, setValue];
-  } else {
-    return [value, setValue];
-  }
+const subscribe = (callback) => {
+  window.addEventListener('languagechange', callback);
+  return () => window.removeEventListener('languagechange', callback);
+};
+
+const getSnapshot = () => {
+  return navigator.language;
+};
+
+const getServerSnapshot = () => {
+  throw Error('usePreferredLanguage is a client only');
+};
+
+export function usePreferredLanguage() {
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export default function App() {
-  const initialState = { name: 'Tyler' };
-  const defaultState = { name: 'Ben' };
-
-  const [user, setUser] = useDefault(initialState, defaultState);
+  const language = usePreferredLanguage();
+  const date = new Date().toLocaleString(`${language}`);
 
   return (
-    <section>
-      <h1>useDefault</h1>
-
-      <button
-        title="Sets the value to Lynn"
-        className="link"
-        onClick={() => setUser({ name: 'Lynn' })}
-      >
-        Lynn
-      </button>
-      <button
-        title="Sets the value to Tyler"
-        className="link"
-        onClick={() => setUser({ name: 'Tyler' })}
-      >
-        Tyler
-      </button>
-      <button
-        title="Sets the value to null causing it to use the default value"
-        className="link"
-        onClick={() => setUser(null)}
-      >
-        null
-      </button>
-      <pre>
-        <code>{JSON.stringify(user)}</code>
-      </pre>
-    </section>
+    <>
+      <div className="container">
+        <h1>usePreferredLanguage</h1>
+        <div>
+          You can change your preferred language here - chrome://settings/languages
+        </div>
+        <div>{`The correct date format for ${language} is ${date}`}</div>
+      </div>
+    </>
   );
 }
