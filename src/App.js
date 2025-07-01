@@ -1,19 +1,20 @@
 import * as React from 'react';
 
+const subscribe = (callback) => {
+  window.addEventListener('languagechange', callback);
+  return () => window.removeEventListener('languagechange', callback);
+};
+
+const getSnapshot = () => {
+  return navigator.language;
+};
+
+const getServerSnapshot = () => {
+  throw Error('usePreferredLanguage is a client only');
+};
+
 export function usePreferredLanguage() {
-  const [lang, setLang] = React.useState(() => navigator.language);
-
-  const handler = () => setLang(navigator.language);
-
-  React.useEffect(() => {
-    window.addEventListener('languagechange', handler);
-
-    return () => {
-      window.removeEventListener('languagechange', handler);
-    };
-  }, []);
-
-  return lang;
+  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export default function App() {
