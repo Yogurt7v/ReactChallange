@@ -1,35 +1,52 @@
-import * as React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
-const subscribe = (callback) => {
-  window.addEventListener('languagechange', callback);
-  return () => window.removeEventListener('languagechange', callback);
-};
-
-const getSnapshot = () => {
-  return navigator.language;
-};
-
-const getServerSnapshot = () => {
-  throw Error('usePreferredLanguage is a client only');
-};
-
-export function usePreferredLanguage() {
-  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+function oldSchoolCopy(text) {
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = text;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  document.execCommand('copy');
+  document.body.removeChild(tempTextArea);
 }
 
-export default function App() {
-  const language = usePreferredLanguage();
-  const date = new Date().toLocaleString(`${language}`);
+export function useCopyToClipboard() {
+  const [text, setText] = useState();
 
+  const handleCopy = useCallback((val) => {
+    const asyncCopy = async () => {
+      try {
+        if (navigator?.clipboard?.writeText) {
+          await navigator.clipboard.writeText(val);
+          setText(val);
+        } else {
+          throw new Error('No Navigator');
+        }
+      } catch (e) {
+        oldSchoolCopy(val);
+        setText(val);
+      }
+    };
+    asyncCopy();
+  }, []);
+
+  return [text, handleCopy];
+}
+
+const randomHash = crypto.randomUUID();
+
+export default function App() {
+  const [copiedText, copyToClipboard] = useCopyToClipboard();
+  console.log('Скопированный текст', copiedText);
   return (
-    <>
-      <div className="container">
-        <h1>usePreferredLanguage</h1>
-        <div>
-          You can change your preferred language here - chrome://settings/languages
-        </div>
-        <div>{`The correct date format for ${language} is ${date}`}</div>
-      </div>
-    </>
+    <section>
+      <h1>useCopyToClipboard</h1>
+      <article>
+        <label>Fake API Key</label>
+        <pre>
+          <code>{randomHash}</code>
+          <button ton className="link" onClick={() => copyToClipboard(randomHash)} />
+        </pre>
+      </article>
+    </section>
   );
 }
