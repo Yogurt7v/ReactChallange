@@ -1,52 +1,46 @@
-import React, { useCallback, useRef, useState } from 'react';
+import * as React from 'react';
+React.useEffectEvent = React.experimental_useEffectEvent;
 
-function oldSchoolCopy(text) {
-  const tempTextArea = document.createElement('textarea');
-  tempTextArea.value = text;
-  document.body.appendChild(tempTextArea);
-  tempTextArea.select();
-  document.execCommand('copy');
-  document.body.removeChild(tempTextArea);
-}
+export function useInterval(callback, delay) {
+  const onInterval = React.useCallback(callback, []);
+  const id = React.useRef(null);
 
-export function useCopyToClipboard() {
-  const [text, setText] = useState();
-
-  const handleCopy = useCallback((val) => {
-    const asyncCopy = async () => {
-      try {
-        if (navigator?.clipboard?.writeText) {
-          await navigator.clipboard.writeText(val);
-          setText(val);
-        } else {
-          throw new Error('No Navigator');
-        }
-      } catch (e) {
-        oldSchoolCopy(val);
-        setText(val);
-      }
-    };
-    asyncCopy();
+  const handleClearInterval = React.useCallback(() => {
+    window.clearInterval(id.current);
   }, []);
 
-  return [text, handleCopy];
+  React.useEffect(() => {
+    id.current = window.setInterval(callback, delay);
+
+    return handleClearInterval;
+  }, [delay, handleClearInterval, callback]);
+
+  return handleClearInterval;
 }
 
-const randomHash = crypto.randomUUID();
+const colors = ['green', 'blue', 'purple', 'red', 'pink', 'beige', 'yellow'];
 
 export default function App() {
-  const [copiedText, copyToClipboard] = useCopyToClipboard();
-  console.log('Скопированный текст', copiedText);
+  const [running, setIsRunning] = React.useState(true);
+  const [index, setIndex] = React.useState(0);
+
+  const clear = useInterval(() => {
+    setIndex(index + 1);
+  }, 1000);
+
+  const handleStop = () => {
+    clear();
+    setIsRunning(false);
+  };
+
+  const color = colors[index % colors.length];
   return (
     <section>
-      <h1>useCopyToClipboard</h1>
-      <article>
-        <label>Fake API Key</label>
-        <pre>
-          <code>{randomHash}</code>
-          <button ton className="link" onClick={() => copyToClipboard(randomHash)} />
-        </pre>
-      </article>
+      <h1>useInterval</h1>
+      <button disabled={!running} className="link" onClick={handleStop}>
+        {running ? 'Stop' : 'Stopped'}
+      </button>
+      <div style={{ backgroundColor: `${color}` }} />
     </section>
   );
 }
