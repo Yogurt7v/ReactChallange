@@ -17,19 +17,19 @@ export function useCounter(startingValue = 0, options = {}) {
 
   const [count, setCount] = React.useState(startingValue);
 
-  const increment = () => {
+  const increment = React.useCallback(() => {
     let val = count + 1;
     if (val <= max) {
       setCount(val);
     }
-  };
+  }, [max, count]);
 
-  const decrement = () => {
+  const decrement = React.useCallback(() => {
     let val = count - 1;
     if (val >= min) {
       setCount(val);
     }
-  };
+  }, [min, count]);
 
   const set = (nextState) => {
     if (nextState >= min && nextState <= max) {
