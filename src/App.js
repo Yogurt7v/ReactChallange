@@ -15,21 +15,26 @@ export function useCounter(startingValue = 0, options = {}) {
     );
   }
 
-  let [count, setCount] = React.useState(startingValue);
+  const [count, setCount] = React.useState(startingValue);
 
   const increment = () => {
-    setCount(++count);
-    console.log('inc', count);
+    let val = count + 1;
+    if (val <= max) {
+      setCount(val);
+    }
   };
 
   const decrement = () => {
-    setCount(--count);
-    console.log('dec', count);
+    let val = count - 1;
+    if (val >= min) {
+      setCount(val);
+    }
   };
 
   const set = (nextState) => {
-    setCount(nextState);
-    console.log('new state', count);
+    if (nextState >= min && nextState <= max) {
+      setCount(nextState);
+    }
   };
 
   const reset = () => {
