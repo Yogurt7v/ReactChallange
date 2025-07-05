@@ -1,77 +1,49 @@
 import * as React from 'react';
+import { useQueue } from '@uidotdev/usehooks';
 
-export function useCounter(startingValue = 0, options = {}) {
-  const { min, max } = options;
-
-  if (typeof min === 'number' && startingValue < min) {
-    throw new Error(
-      `Your starting value of ${startingValue} is less than your min of ${min}.`
-    );
-  }
-
-  if (typeof max === 'number' && startingValue > max) {
-    throw new Error(
-      `Your starting value of ${startingValue} is greater than your max of ${max}.`
-    );
-  }
-
-  const [count, setCount] = React.useState(startingValue);
-
-  const increment = React.useCallback(() => {
-    let val = count + 1;
-    if (val <= max) {
-      setCount(val);
-    }
-  }, [max, count]);
-
-  const decrement = React.useCallback(() => {
-    let val = count - 1;
-    if (val >= min) {
-      setCount(val);
-    }
-  }, [min, count]);
-
-  const set = (nextState) => {
-    if (nextState >= min && nextState <= max) {
-      setCount(nextState);
-    }
-  };
-
-  const reset = () => {
-    setCount(startingValue);
-    console.log('reset', count);
-  };
-
-  return [
-    count,
-    {
-      increment,
-      decrement,
-      set,
-      reset,
-    },
-  ];
+function QueueDemo({ first, last, size, queue }) {
+  return (
+    <figure>
+      <article>
+        <p>Front</p>
+        <ul>
+          {queue.map((item, i) => {
+            const isFirst = first === item;
+            const isLast = last === item;
+            if (isFirst) {
+              return <li key={i}>First: {item}</li>;
+            }
+            if (isLast) {
+              return <li key={i}>Last: {item}</li>;
+            }
+            return <li key={i}>Item: {item}</li>;
+          })}
+        </ul>
+        <p>Back</p>
+      </article>
+      <figcaption>{size} items in the queue</figcaption>
+    </figure>
+  );
 }
 
 export default function App() {
-  const [count, { increment, decrement, set, reset }] = useCounter(6, {
-    min: 5,
-    max: 10,
-  });
+  const { add, remove, clear, first, last, size, queue } = useQueue([1, 2, 3]);
 
   return (
-    <>
-      <div className="wrapper">
-        <h2>UseCounter</h2>
-        <div>с опциональным мин/макс</div>
-        <div className="buttonWrapper">
-          <button onClick={() => increment()}>Increment</button>
-          <button onClick={() => decrement()}>Decrement</button>
-          <button onClick={() => set(9)}>Set to 9</button>
-          <button onClick={() => reset()}>Reset</button>
-        </div>
-        <h1>{count}</h1>
-      </div>
-    </>
+    <div>
+      <header>
+        <h1>UseQueue</h1>
+        <button className="link" onClick={() => add((last || 0) + 1)}>
+          Add
+        </button>
+        <button disabled={size === 0} className="link" onClick={() => remove()}>
+          Remove
+        </button>
+        <button disabled={size === 0} className="link" onClick={() => clear()}>
+          Clear
+        </button>
+      </header>
+      <QueueDemo queue={queue} size={size} first={first} last={last} />
+    </div>
   );
 }
