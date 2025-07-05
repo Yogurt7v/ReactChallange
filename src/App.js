@@ -1,49 +1,79 @@
 import * as React from 'react';
-import { useQueue } from '@uidotdev/usehooks';
 
-function QueueDemo({ first, last, size, queue }) {
+export function useTimeout(cb, ms) {
+  const id = React.useRef(null);
+
+  const handleClearTimeout = React.useCallback(() => {
+    window.clearTimeout(id);
+  }, []);
+
+  React.useEffect(() => {
+    id.current = window.setInterval(cb, ms);
+
+    return handleClearTimeout;
+  }, [cb, ms, handleClearTimeout]);
+
+  return handleClearTimeout;
+}
+
+function Bomb({ hasExploded, hasDefused, handleClick }) {
+  if (hasExploded) {
+    return (
+      <figure>
+        <span role="img" aria-label="Explosion Emoji">
+          💥
+        </span>
+        <figcaption>You lose</figcaption>
+      </figure>
+    );
+  }
+
+  if (hasDefused) {
+    return (
+      <figure>
+        <span role="img" aria-label="Explosion Emoji">
+          🎉
+        </span>
+        <figcaption>You Win</figcaption>
+      </figure>
+    );
+  }
+
   return (
-    <figure>
-      <article>
-        <p>Front</p>
-        <ul>
-          {queue.map((item, i) => {
-            const isFirst = first === item;
-            const isLast = last === item;
-            if (isFirst) {
-              return <li key={i}>First: {item}</li>;
-            }
-            if (isLast) {
-              return <li key={i}>Last: {item}</li>;
-            }
-            return <li key={i}>Item: {item}</li>;
-          })}
-        </ul>
-        <p>Back</p>
-      </article>
-      <figcaption>{size} items in the queue</figcaption>
-    </figure>
+    <button className="bomb" onClick={handleClick}>
+      <span role="img" aria-label="Dynamite Emoji">
+        🧨
+      </span>
+    </button>
   );
 }
 
 export default function App() {
-  const { add, remove, clear, first, last, size, queue } = useQueue([1, 2, 3]);
+  const [hasDefused, setHasDefused] = React.useState(false);
+  const [hasExploded, setHasExploded] = React.useState(false);
+
+  const clear = useTimeout(() => {
+    setHasExploded(!hasExploded);
+  }, 1000);
+
+  const handleClick = () => {
+    clear();
+    setHasDefused(true);
+  };
 
   return (
-    <div>
-      <header>
-        <h1>UseQueue</h1>
-        <button className="link" onClick={() => add((last || 0) + 1)}>
-          Add
-        </button>
-        <button disabled={size === 0} className="link" onClick={() => remove()}>
-          Remove
-        </button>
-        <button disabled={size === 0} className="link" onClick={() => clear()}>
-          Clear
-        </button>
-      </header>
-      <QueueDemo queue={queue} size={size} first={first} last={last} />
-    </div>
+    <section>
+      <h1>useTimeout</h1>
+      <p>You have 1s to defuse (click) the bomb or it will explode </p>
+      <button
+        className="link"
+        onClick={() => {
+          window.location.reload();
+        }}
+      >
+        Reload
+      </button>
+      <Bomb hasDefused={hasDefused} hasExploded={hasExploded} handleClick={handleClick} />
+    </section>
   );
 }
