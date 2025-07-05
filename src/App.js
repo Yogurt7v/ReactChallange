@@ -1,46 +1,77 @@
 import * as React from 'react';
-React.useEffectEvent = React.experimental_useEffectEvent;
 
-export function useInterval(callback, delay) {
-  const onInterval = React.useCallback(callback, []);
-  const id = React.useRef(null);
+export function useCounter(startingValue = 0, options = {}) {
+  const { min, max } = options;
 
-  const handleClearInterval = React.useCallback(() => {
-    window.clearInterval(id.current);
-  }, []);
+  if (typeof min === 'number' && startingValue < min) {
+    throw new Error(
+      `Your starting value of ${startingValue} is less than your min of ${min}.`
+    );
+  }
 
-  React.useEffect(() => {
-    id.current = window.setInterval(callback, delay);
+  if (typeof max === 'number' && startingValue > max) {
+    throw new Error(
+      `Your starting value of ${startingValue} is greater than your max of ${max}.`
+    );
+  }
 
-    return handleClearInterval;
-  }, [delay, handleClearInterval, callback]);
+  const [count, setCount] = React.useState(startingValue);
 
-  return handleClearInterval;
-}
+  const increment = React.useCallback(() => {
+    let val = count + 1;
+    if (val <= max) {
+      setCount(val);
+    }
+  }, [max, count]);
 
-const colors = ['green', 'blue', 'purple', 'red', 'pink', 'beige', 'yellow'];
+  const decrement = React.useCallback(() => {
+    let val = count - 1;
+    if (val >= min) {
+      setCount(val);
+    }
+  }, [min, count]);
 
-export default function App() {
-  const [running, setIsRunning] = React.useState(true);
-  const [index, setIndex] = React.useState(0);
-
-  const clear = useInterval(() => {
-    setIndex(index + 1);
-  }, 1000);
-
-  const handleStop = () => {
-    clear();
-    setIsRunning(false);
+  const set = (nextState) => {
+    if (nextState >= min && nextState <= max) {
+      setCount(nextState);
+    }
   };
 
-  const color = colors[index % colors.length];
+  const reset = () => {
+    setCount(startingValue);
+    console.log('reset', count);
+  };
+
+  return [
+    count,
+    {
+      increment,
+      decrement,
+      set,
+      reset,
+    },
+  ];
+}
+
+export default function App() {
+  const [count, { increment, decrement, set, reset }] = useCounter(6, {
+    min: 5,
+    max: 10,
+  });
+
   return (
-    <section>
-      <h1>useInterval</h1>
-      <button disabled={!running} className="link" onClick={handleStop}>
-        {running ? 'Stop' : 'Stopped'}
-      </button>
-      <div style={{ backgroundColor: `${color}` }} />
-    </section>
+    <>
+      <div className="wrapper">
+        <h2>UseCounter</h2>
+        <div>с опциональным мин/макс</div>
+        <div className="buttonWrapper">
+          <button onClick={() => increment()}>Increment</button>
+          <button onClick={() => decrement()}>Decrement</button>
+          <button onClick={() => set(9)}>Set to 9</button>
+          <button onClick={() => reset()}>Reset</button>
+        </div>
+        <h1>{count}</h1>
+      </div>
+    </>
   );
 }
