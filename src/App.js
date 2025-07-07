@@ -1,23 +1,25 @@
 import * as React from 'react';
 
 export function useWindowSize() {
-  const [height, setHeight] = React.useState(() => window.innerHeight);
-  const [width, setWidth] = React.useState(() => window.innerWidth);
+  const [size, setSize] = React.useState({
+    height: 0,
+    width: 0,
+  });
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const handleChange = () =>
-      window.addEventListener('resize', () => {
-        setHeight(window.innerHeight);
-        setWidth(window.innerWidth);
+      setSize({
+        height: window.innerHeight,
+        width: window.innerWidth,
       });
     handleChange();
-    return window.removeEventListener('resize', handleChange);
-  }, [height, width]);
+    window.addEventListener('resize', handleChange);
+    return () => {
+      window.removeEventListener('resize', handleChange);
+    };
+  }, []);
 
-  return {
-    height,
-    width,
-  };
+  return size;
 }
 
 export default function App() {
