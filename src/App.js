@@ -1,79 +1,37 @@
 import * as React from 'react';
 
-export function useTimeout(cb, ms) {
-  const id = React.useRef(null);
+export function useWindowSize() {
+  const [size, setSize] = React.useState({
+    height: 0,
+    width: 0,
+  });
 
-  const handleClearTimeout = React.useCallback(() => {
-    window.clearTimeout(id);
+  React.useLayoutEffect(() => {
+    const handleChange = () =>
+      setSize({
+        height: window.innerHeight,
+        width: window.innerWidth,
+      });
+    handleChange();
+    window.addEventListener('resize', handleChange);
+    return () => {
+      window.removeEventListener('resize', handleChange);
+    };
   }, []);
 
-  React.useEffect(() => {
-    id.current = window.setInterval(cb, ms);
-
-    return handleClearTimeout;
-  }, [cb, ms, handleClearTimeout]);
-
-  return handleClearTimeout;
-}
-
-function Bomb({ hasExploded, hasDefused, handleClick }) {
-  if (hasExploded) {
-    return (
-      <figure>
-        <span role="img" aria-label="Explosion Emoji">
-          💥
-        </span>
-        <figcaption>You lose</figcaption>
-      </figure>
-    );
-  }
-
-  if (hasDefused) {
-    return (
-      <figure>
-        <span role="img" aria-label="Explosion Emoji">
-          🎉
-        </span>
-        <figcaption>You Win</figcaption>
-      </figure>
-    );
-  }
-
-  return (
-    <button className="bomb" onClick={handleClick}>
-      <span role="img" aria-label="Dynamite Emoji">
-        🧨
-      </span>
-    </button>
-  );
+  return size;
 }
 
 export default function App() {
-  const [hasDefused, setHasDefused] = React.useState(false);
-  const [hasExploded, setHasExploded] = React.useState(false);
-
-  const clear = useTimeout(() => {
-    setHasExploded(!hasExploded);
-  }, 1000);
-
-  const handleClick = () => {
-    clear();
-    setHasDefused(true);
-  };
-
+  const { width, height } = useWindowSize();
   return (
-    <section>
-      <h1>useTimeout</h1>
-      <p>You have 1s to defuse (click) the bomb or it will explode </p>
-      <button
-        className="link"
-        onClick={() => {
-          window.location.reload();
-        }}
-      >
-        Reload
-      </button>
-      <Bomb hasDefused={hasDefused} hasExploded={hasExploded} handleClick={handleClick} />
-    </section>
+    <>
+      <div className="wrapper">
+        <h1>useWindowSize</h1>
+        <p>Resize the window</p>
+        <div>width: {width}</div>
+        <div>height: {height}</div>
+      </div>
+    </>
   );
 }
