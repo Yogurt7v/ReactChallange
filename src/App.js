@@ -6,7 +6,7 @@ export function useVisibilityChange() {
   React.useEffect(() => {
     const visible = () => {
       document.addEventListener('visibilitychange', () => {
-        document.visibilityState === 'visible' ? setIsVisible(true) : setIsVisible(false);
+        setIsVisible(document.visibilityState === 'visible');
       });
     };
 
