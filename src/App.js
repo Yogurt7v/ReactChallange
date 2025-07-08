@@ -1,37 +1,38 @@
 import * as React from 'react';
 
-export function useWindowSize() {
-  const [size, setSize] = React.useState({
-    height: 0,
-    width: 0,
-  });
+export function useVisibilityChange() {
+  const [isVisible, setIsVisible] = React.useState(true);
 
-  React.useLayoutEffect(() => {
-    const handleChange = () =>
-      setSize({
-        height: window.innerHeight,
-        width: window.innerWidth,
+  React.useEffect(() => {
+    const visible = () => {
+      document.addEventListener('visibilitychange', () => {
+        document.visibilityState === 'visible' ? setIsVisible(true) : setIsVisible(false);
       });
-    handleChange();
-    window.addEventListener('resize', handleChange);
-    return () => {
-      window.removeEventListener('resize', handleChange);
     };
+
+    visible();
+
+    return () => document.removeEventListener('visibilitychange', visible);
   }, []);
 
-  return size;
+  return isVisible;
 }
 
 export default function App() {
-  const { width, height } = useWindowSize();
+  const documentVisible = useVisibilityChange();
+
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (documentVisible) {
+      setCount(count + 1);
+    }
+  }, [documentVisible]);
+
   return (
-    <>
-      <div className="wrapper">
-        <h1>useWindowSize</h1>
-        <p>Resize the window</p>
-        <div>width: {width}</div>
-        <div>height: {height}</div>
-      </div>
-    </>
+    <div className="wrapper">
+      <h1>useVisibilityChange</h1>
+      <p>Tab is visible Count: {count}</p>
+    </div>
   );
 }
