@@ -1,38 +1,76 @@
 import * as React from 'react';
+export function useList(defaultList = []) {
+  const [list, setList] = React.useState(defaultList);
 
-export function useVisibilityChange() {
-  const [isVisible, setIsVisible] = React.useState(true);
+  const set = () => setList([1, 2, 3]);
 
-  React.useEffect(() => {
-    const visible = () => {
-      document.addEventListener('visibilitychange', () => {
-        setIsVisible(document.visibilityState === 'visible');
-      });
-    };
+  const push = (newOne) => setList([...list, newOne]);
 
-    visible();
+  const removeAt = (n) => setList(list.filter((item, index) => index !== n - 1));
 
-    return () => document.removeEventListener('visibilitychange', visible);
-  }, []);
+  const insertAt = (n, value) => {
+    const copy = [...list];
+    copy.splice(n, 0, value);
+    setList(copy);
+  };
 
-  return isVisible;
+  const updateAt = (n, value) => {
+    const copy = [...list];
+    copy.splice(n, 1, value);
+    setList(copy);
+  };
+
+  const clear = () => setList([]);
+
+  return [list, { set, push, removeAt, insertAt, updateAt, clear }];
 }
 
 export default function App() {
-  const documentVisible = useVisibilityChange();
+  const [list, { set, push, removeAt, insertAt, updateAt, clear }] = useList([
+    'First',
+    'Second',
+    'Third',
+  ]);
 
-  const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    if (documentVisible) {
-      setCount(count + 1);
-    }
-  }, [documentVisible]);
+  const [newValue, setNewValue] = React.useState('');
 
   return (
     <div className="wrapper">
-      <h1>useVisibilityChange</h1>
-      <p>Tab is visible Count: {count}</p>
+      <h1>UseList</h1>
+      <div className="links">
+        <button onClick={() => insertAt(1, 777)}>Insert After First</button>
+        <button onClick={() => removeAt(2)}>Remove Second Item</button>
+        <button onClick={set}>Set([1,2,3])</button>
+        <button onClick={clear}>Clear</button>
+      </div>
+
+      <div className="input">
+        <input
+          type="text"
+          placeholder="Add new"
+          value={newValue}
+          onChange={(e) => setNewValue(e.target.value)}
+        />
+        <button
+          onClick={() => {
+            push(newValue);
+            setNewValue('');
+          }}
+          disabled={newValue.length <= 0 ? true : false}
+        >
+          Add
+        </button>
+      </div>
+
+      <div className="result">
+        {list.map((item, index) => (
+          <div className="item" key={index}>
+            <div>{item}</div>
+            <button onClick={() => updateAt(index, 'newOne')}>Edit</button>
+            <button onClick={() => removeAt(index)}>Delete</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
