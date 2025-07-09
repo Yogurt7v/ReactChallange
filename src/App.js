@@ -1,24 +1,34 @@
 import * as React from 'react';
+
 export function useList(defaultList = []) {
   const [list, setList] = React.useState(defaultList);
 
-  const set = () => setList([1, 2, 3]);
+  const set = React.useCallback((newList) => setList(newList), []);
 
-  const push = (newOne) => setList([...list, newOne]);
+  const push = React.useCallback((newOne) => setList([...list, newOne]), [list]);
 
-  const removeAt = (n) => setList(list.filter((item, index) => index !== n - 1));
+  const removeAt = React.useCallback(
+    (n) => setList(list.filter((_, index) => index !== n - 1)),
+    [list]
+  );
 
-  const insertAt = (n, value) => {
-    const copy = [...list];
-    copy.splice(n, 0, value);
-    setList(copy);
-  };
+  const insertAt = React.useCallback(
+    (n, value) => {
+      const copy = [...list];
+      copy.splice(n, 0, value);
+      setList(copy);
+    },
+    [list]
+  );
 
-  const updateAt = (n, value) => {
-    const copy = [...list];
-    copy.splice(n, 1, value);
-    setList(copy);
-  };
+  const updateAt = React.useCallback(
+    (n, value) => {
+      const copy = [...list];
+      copy.splice(n, 1, value);
+      setList(copy);
+    },
+    [list]
+  );
 
   const clear = () => setList([]);
 
@@ -26,11 +36,7 @@ export function useList(defaultList = []) {
 }
 
 export default function App() {
-  const [list, { set, push, removeAt, insertAt, updateAt, clear }] = useList([
-    'First',
-    'Second',
-    'Third',
-  ]);
+  const [list, { set, push, removeAt, insertAt, updateAt, clear }] = useList();
 
   const [newValue, setNewValue] = React.useState('');
 
@@ -40,7 +46,7 @@ export default function App() {
       <div className="links">
         <button onClick={() => insertAt(1, 777)}>Insert After First</button>
         <button onClick={() => removeAt(2)}>Remove Second Item</button>
-        <button onClick={set}>Set([1,2,3])</button>
+        <button onClick={() => set([1, 2, 3])}>Set([1,2,3])</button>
         <button onClick={clear}>Clear</button>
       </div>
 
