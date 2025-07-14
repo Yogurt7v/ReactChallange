@@ -1,81 +1,86 @@
+import { type } from '@testing-library/user-event/dist/type';
 import * as React from 'react';
 
-export function useList(defaultList = []) {
-  const [list, setList] = React.useState(defaultList);
+const isPlainObject = (value) => {
+  return Object.prototype.toString.call(value) === '[object Object]';
+};
 
-  const set = React.useCallback((newList) => setList(newList), []);
+export function useObjectState(initialValue) {
+  const [state, setState] = React.useState(initialValue);
 
-  const push = React.useCallback((newOne) => setList([...list, newOne]), [list]);
+  const handleUpdate = React.useCallback((arg) => {
+    if (isPlainObject(arg)) {
+      setState((s) => ({
+        ...s,
+        ...arg,
+      }));
+    }
+    if (typeof arg === 'function') {
+      setState((s) => {
+        const newState = arg(s);
 
-  const removeAt = React.useCallback(
-    (n) => setList(list.filter((_, index) => index !== n - 1)),
-    [list]
-  );
+        if (isPlainObject(newState)) {
+          return {
+            ...s,
+            ...newState,
+          };
+        }
+      });
+    }
+  }, []);
 
-  const insertAt = React.useCallback(
-    (n, value) => {
-      const copy = [...list];
-      copy.splice(n, 0, value);
-      setList(copy);
-    },
-    [list]
-  );
-
-  const updateAt = React.useCallback(
-    (n, value) => {
-      const copy = [...list];
-      copy.splice(n, 1, value);
-      setList(copy);
-    },
-    [list]
-  );
-
-  const clear = () => setList([]);
-
-  return [list, { set, push, removeAt, insertAt, updateAt, clear }];
+  return [state, handleUpdate];
 }
 
 export default function App() {
-  const [list, { set, push, removeAt, insertAt, updateAt, clear }] = useList();
-
-  const [newValue, setNewValue] = React.useState('');
+  const [state, setState] = useObjectState({
+    team: 'Utah Jazz',
+    wins: 1238,
+    loses: 1789,
+    champs: 0,
+  });
 
   return (
     <div className="wrapper">
-      <h1>UseList</h1>
-      <div className="links">
-        <button onClick={() => insertAt(1, 777)}>Insert After First</button>
-        <button onClick={() => removeAt(2)}>Remove Second Item</button>
-        <button onClick={() => set([1, 2, 3])}>Set([1,2,3])</button>
-        <button onClick={clear}>Clear</button>
-      </div>
-
-      <div className="input">
-        <input
-          type="text"
-          placeholder="Add new"
-          value={newValue}
-          onChange={(e) => setNewValue(e.target.value)}
-        />
+      <h1>useObjectState</h1>
+      <div className="buttons">
+        <button onClick={() => setState((s) => ({ wins: s.wins + 1 }))}>Add Win</button>
+        <button onClick={() => setState((s) => ({ loses: s.loses + 1 }))}>
+          Add Lose
+        </button>
+        <button onClick={() => setState((s) => ({ champs: s.champs + 1 }))}>
+          Add Championship
+        </button>
         <button
-          onClick={() => {
-            push(newValue);
-            setNewValue('');
-          }}
-          disabled={newValue.length <= 0 ? true : false}
+          onClick={() =>
+            setState({
+              team: 'KF',
+              wins: 0,
+              loses: 0,
+              champs: 0,
+            })
+          }
         >
-          Add
+          Reset
         </button>
       </div>
+      <div className="table">
+        <td>
+          TEAM <tr>{state.team}</tr>
+        </td>
 
-      <div className="result">
-        {list.map((item, index) => (
-          <div className="item" key={index}>
-            <div>{item}</div>
-            <button onClick={() => updateAt(index, 'newOne')}>Edit</button>
-            <button onClick={() => removeAt(index)}>Delete</button>
-          </div>
-        ))}
+        <td>
+          WINS
+          <tr>{state.wins}</tr>
+        </td>
+        <td>
+          LOSSES
+          <tr>{state.loses}</tr>
+        </td>
+        <td>
+          Championships
+          <tr>{state.champs}</tr>
+        </td>
       </div>
     </div>
   );
