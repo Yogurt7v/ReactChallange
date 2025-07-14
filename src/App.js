@@ -1,87 +1,31 @@
-import { type } from '@testing-library/user-event/dist/type';
 import * as React from 'react';
 
-const isPlainObject = (value) => {
-  return Object.prototype.toString.call(value) === '[object Object]';
-};
+export function useDebounce(value, delay) {
+  const [newValue, setNewValue] = React.useState(value);
 
-export function useObjectState(initialValue) {
-  const [state, setState] = React.useState(initialValue);
+  React.useEffect(() => {
+    const timer = () => setTimeout(() => setNewValue(value), delay);
 
-  const handleUpdate = React.useCallback((arg) => {
-    if (isPlainObject(arg)) {
-      setState((s) => ({
-        ...s,
-        ...arg,
-      }));
-    }
-    if (typeof arg === 'function') {
-      setState((s) => {
-        const newState = arg(s);
+    timer();
+    return () => clearTimeout(timer);
+  }, [value, delay, newValue]);
 
-        if (isPlainObject(newState)) {
-          return {
-            ...s,
-            ...newState,
-          };
-        }
-      });
-    }
-  }, []);
-
-  return [state, handleUpdate];
+  return newValue;
 }
 
 export default function App() {
-  const [state, setState] = useObjectState({
-    team: 'Utah Jazz',
-    wins: 1238,
-    loses: 1789,
-    champs: 0,
-  });
+  const [value, setValue] = React.useState('');
+  const debouncedValue = useDebounce(value, 1000);
 
   return (
     <div className="wrapper">
-      <h1>useObjectState</h1>
-      <div className="buttons">
-        <button onClick={() => setState((s) => ({ wins: s.wins + 1 }))}>Add Win</button>
-        <button onClick={() => setState((s) => ({ loses: s.loses + 1 }))}>
-          Add Lose
-        </button>
-        <button onClick={() => setState((s) => ({ champs: s.champs + 1 }))}>
-          Add Championship
-        </button>
-        <button
-          onClick={() =>
-            setState({
-              team: 'KF',
-              wins: 0,
-              loses: 0,
-              champs: 0,
-            })
-          }
-        >
-          Reset
-        </button>
+      <h1>useDebounce</h1>
+      <div className="input" value={value} onChange={(e) => setValue(e.target.value)}>
+        <input type="text" placeholder="search" />
+        <button>Search</button>
       </div>
-      <div className="table">
-        <td>
-          TEAM <tr>{state.team}</tr>
-        </td>
 
-        <td>
-          WINS
-          <tr>{state.wins}</tr>
-        </td>
-        <td>
-          LOSSES
-          <tr>{state.loses}</tr>
-        </td>
-        <td>
-          Championships
-          <tr>{state.champs}</tr>
-        </td>
-      </div>
+      {debouncedValue}
     </div>
   );
 }
