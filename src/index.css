@@ -17,8 +17,18 @@ div {
   padding: 10px;
 }
 
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
 button {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid black;
+}
+
+.table {
+  display: flex;
+  gap: 20px;
 }
