@@ -1,31 +1,60 @@
 import * as React from 'react';
 
-export function useDebounce(value, delay) {
-  const [newValue, setNewValue] = React.useState(value);
+React.useEffectEvent = React.experimental_useEffectEvent;
+
+export function useContinuousRetry(callback, interval = 100, options = {}) {
+  const { maxRetries = Infinity } = options;
+  const [hasResolved, setHasResolved] = React.useState(false);
+
+  const onInterval = React.useEffectEvent(callback);
 
   React.useEffect(() => {
-    const timer = () => setTimeout(() => setNewValue(value), delay);
+    let retries = 0;
 
-    timer();
-    return () => clearTimeout(timer);
-  }, [value, delay, newValue]);
+    const letsTry = () => {
+      setInterval(() => {
+        if (onInterval()) {
+          setHasResolved(true);
+          clearInterval(letsTry);
+          retries++;
+        } else if (retries >= maxRetries) {
+          clearInterval(letsTry);
+        } else {
+          retries += 1;
+        }
+      }, interval);
+    };
 
-  return newValue;
+    letsTry();
+
+    return () => clearInterval(letsTry);
+  }, [interval, maxRetries, onInterval]);
+
+  return hasResolved;
 }
 
 export default function App() {
-  const [value, setValue] = React.useState('');
-  const debouncedValue = useDebounce(value, 1000);
+  const [count, setCount] = React.useState(0);
+  const hasResolved = useContinuousRetry(
+    () => {
+      console.log('retrying');
+      return count > 10;
+    },
+    1000,
+    { maxRetries: 5 }
+  );
 
   return (
-    <div className="wrapper">
-      <h1>useDebounce</h1>
-      <div className="input" value={value} onChange={(e) => setValue(e.target.value)}>
-        <input type="text" placeholder="search" />
-        <button>Search</button>
-      </div>
-
-      {debouncedValue}
-    </div>
+    <section>
+      <h1>useContinuousRetry</h1>
+      <button
+        className="primary"
+        onClick={() => setCount(count + 1)}
+        disabled={hasResolved}
+      >
+        {count}
+      </button>
+      <pre>{JSON.stringify({ hasResolved, count }, null, 2)}</pre>
+    </section>
   );
 }
