@@ -1,60 +1,111 @@
 import * as React from 'react';
 
-React.useEffectEvent = React.experimental_useEffectEvent;
+const initialState = {
+  past: [],
+  present: null,
+  future: [],
+};
 
-export function useContinuousRetry(callback, interval = 100, options = {}) {
-  const { maxRetries = Infinity } = options;
-  const [hasResolved, setHasResolved] = React.useState(false);
+const reducer = (state, action) => {
+  const { past, present, future } = state;
 
-  const onInterval = React.useEffectEvent(callback);
-
-  React.useEffect(() => {
-    let retries = 0;
-
-    const letsTry = () => {
-      setInterval(() => {
-        if (onInterval()) {
-          setHasResolved(true);
-          clearInterval(letsTry);
-          retries++;
-        } else if (retries >= maxRetries) {
-          clearInterval(letsTry);
-        } else {
-          retries += 1;
-        }
-      }, interval);
+  if (action.type === 'UNDO') {
+    return {
+      past: past.slice(0, past.length - 1),
+      present: past[past.length - 1],
+      future: [present, ...future],
     };
+  } else if (action.type === 'REDO') {
+    return {
+      past: [...past, present],
+      present: future[0],
+      future: future.slice(1),
+    };
+  } else if (action.type === 'SET') {
+    const { newPresent } = action;
 
-    letsTry();
+    if (action.newPresent === present) {
+      return state;
+    }
 
-    return () => clearInterval(letsTry);
-  }, [interval, maxRetries, onInterval]);
+    return {
+      past: [...past, present],
+      present: newPresent,
+      future: [],
+    };
+  } else if (action.type === 'CLEAR') {
+    return {
+      initialState,
+    };
+  } else {
+    return state;
+  }
+};
 
-  return hasResolved;
+export function useHistoryState(defaultState) {
+  const [state, newState] = React.useState(defaultState);
+
+  const set = React.useCallback(
+    (newTodo) => {
+      newState(reducer(state, { type: 'SET', newPresent: newTodo }));
+    },
+    [state]
+  );
+
+  const undo = React.useCallback(() => {
+    newState(reducer(state, { type: 'UNDO' }));
+  }, [state]);
+
+  const redo = React.useCallback(() => {
+    newState(reducer(state, { type: 'REDO' }));
+  }, [state]);
+  const clear = React.useCallback(() => {
+    newState(reducer(state, { type: 'CLEAR' }));
+  }, [state]);
+
+  const canUndo = React.useCallback(() => state?.past?.length !== 0, [state]);
+
+  const canRedo = React.useCallback(() => state?.future?.length !== 0, [state]);
+
+  return { state, canUndo, canRedo, set, undo, redo, clear };
 }
 
 export default function App() {
-  const [count, setCount] = React.useState(0);
-  const hasResolved = useContinuousRetry(
-    () => {
-      console.log('retrying');
-      return count > 10;
-    },
-    1000,
-    { maxRetries: 5 }
-  );
+  const { state, canUndo, canRedo, set, undo, redo, clear } =
+    useHistoryState(initialState);
+
+  const [newTodo, setNewTodo] = React.useState('');
 
   return (
-    <section>
-      <h1>useContinuousRetry</h1>
-      <button
-        className="primary"
-        onClick={() => setCount(count + 1)}
-        disabled={hasResolved}
-      >
-        {count}
-      </button>
-      <pre>{JSON.stringify({ hasResolved, count }, null, 2)}</pre>
-    </section>
+    <div className="wrapper">
+      <h2>useHistoryState</h2>
+      <div className="buttons">
+        <button onClick={() => undo()} disabled={!canUndo()}>
+          Undo
+        </button>
+        <button onClick={() => redo()} disabled={!canRedo()}>
+          Redo
+        </button>
+        <button onClick={() => clear()}>Clear</button>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Add new TODO"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+        />
+        <button
+          onClick={() => {
+            set(newTodo);
+            setNewTodo('');
+          }}
+        >
+          Add
+        </button>
+      </div>
+      <p>{state.present}</p>
+    </div>
   );
 }
