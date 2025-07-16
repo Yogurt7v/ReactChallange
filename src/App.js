@@ -45,24 +45,27 @@ const reducer = (state, action) => {
 export function useHistoryState(defaultState) {
   const [state, newState] = React.useState(defaultState);
 
-  const set = (newTodo) => {
-    newState(reducer(state, { type: 'SET', newPresent: newTodo }));
-  };
+  const set = React.useCallback(
+    (newTodo) => {
+      newState(reducer(state, { type: 'SET', newPresent: newTodo }));
+    },
+    [state]
+  );
 
-  const undo = () => {
+  const undo = React.useCallback(() => {
     newState(reducer(state, { type: 'UNDO' }));
-  };
+  }, [state]);
 
-  const redo = () => {
+  const redo = React.useCallback(() => {
     newState(reducer(state, { type: 'REDO' }));
-  };
-  const clear = () => {
+  }, [state]);
+  const clear = React.useCallback(() => {
     newState(reducer(state, { type: 'CLEAR' }));
-  };
+  }, [state]);
 
-  const canUndo = () => state?.past?.length > 0;
+  const canUndo = React.useCallback(() => state?.past?.length !== 0, [state]);
 
-  const canRedo = () => state?.future?.length > 0;
+  const canRedo = React.useCallback(() => state?.future?.length !== 0, [state]);
 
   return { state, canUndo, canRedo, set, undo, redo, clear };
 }
