@@ -1,34 +1,33 @@
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-top: 100px;
+main {
+  max-width: 600px;
   margin: auto;
-  width: 500px;
+  padding: 24px;
 }
 
-.buttonWrapper {
-  display: flex;
-  gap: 10px;
+main > header {
+  position: sticky;
+  top: 0;
+  background: var(--coal);
+  text-align: center;
+  padding: 24px;
 }
 
-div {
-  padding: 10px;
+dialog {
+  position: fixed;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  top: 40px;
+  background: var(--purple);
+  width: 75vw;
+  margin: auto;
+  display: block;
+  animation: expand 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+  border-radius: 8px;
+  padding: 32px;
+  z-index: 10;
 }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid black;
-}
-
-.table {
-  display: flex;
-  gap: 20px;
+dialog section {
+  max-height: calc(90vh - 120px);
+  overflow: auto;
 }

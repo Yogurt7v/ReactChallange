@@ -1,111 +1,72 @@
 import * as React from 'react';
 
-const initialState = {
-  past: [],
-  present: null,
-  future: [],
-};
+// Полифилл для useEffectEvent (если используется React < 18.3)
+if (!React.useEffectEvent) {
+  React.useEffectEvent = (fn) => fn;
+}
 
-const reducer = (state, action) => {
-  const { past, present, future } = state;
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-  if (action.type === 'UNDO') {
-    return {
-      past: past.slice(0, past.length - 1),
-      present: past[past.length - 1],
-      future: [present, ...future],
-    };
-  } else if (action.type === 'REDO') {
-    return {
-      past: [...past, present],
-      present: future[0],
-      future: future.slice(1),
-    };
-  } else if (action.type === 'SET') {
-    const { newPresent } = action;
+export function useRandomInterval(callback, { minDelay, maxDelay }) {
+  const savedCallback = React.useRef(callback);
+  const timeoutId = React.useRef(null);
 
-    if (action.newPresent === present) {
-      return state;
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  const handleClearInterval = React.useCallback(() => {
+    if (timeoutId.current) {
+      clearTimeout(timeoutId.current);
+      timeoutId.current = null;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    function tick() {
+      const interval = getRandomNumber(minDelay, maxDelay);
+      timeoutId.current = setTimeout(() => {
+        savedCallback.current();
+        tick();
+      }, interval);
     }
 
-    return {
-      past: [...past, present],
-      present: newPresent,
-      future: [],
-    };
-  } else if (action.type === 'CLEAR') {
-    return {
-      initialState,
-    };
-  } else {
-    return state;
-  }
-};
+    if (minDelay !== null && maxDelay !== null) {
+      tick();
+    }
 
-export function useHistoryState(defaultState) {
-  const [state, newState] = React.useState(defaultState);
+    return handleClearInterval;
+  }, [minDelay, maxDelay, handleClearInterval]);
 
-  const set = React.useCallback(
-    (newTodo) => {
-      newState(reducer(state, { type: 'SET', newPresent: newTodo }));
-    },
-    [state]
-  );
-
-  const undo = React.useCallback(() => {
-    newState(reducer(state, { type: 'UNDO' }));
-  }, [state]);
-
-  const redo = React.useCallback(() => {
-    newState(reducer(state, { type: 'REDO' }));
-  }, [state]);
-  const clear = React.useCallback(() => {
-    newState(reducer(state, { type: 'CLEAR' }));
-  }, [state]);
-
-  const canUndo = React.useCallback(() => state?.past?.length !== 0, [state]);
-
-  const canRedo = React.useCallback(() => state?.future?.length !== 0, [state]);
-
-  return { state, canUndo, canRedo, set, undo, redo, clear };
+  return handleClearInterval;
 }
 
 export default function App() {
-  const { state, canUndo, canRedo, set, undo, redo, clear } =
-    useHistoryState(initialState);
+  const [isActive, setIsActive] = React.useState(true);
+  const [count, setCount] = React.useState(0);
 
-  const [newTodo, setNewTodo] = React.useState('');
+  const stopInterval = useRandomInterval(
+    () => {
+      setCount((c) => c + 1);
+      console.log('Interval tick');
+    },
+    { minDelay: 400, maxDelay: 2000 }
+  );
+
+  const toggleInterval = () => {
+    setIsActive(!isActive);
+    if (isActive) {
+      stopInterval();
+    }
+  };
 
   return (
-    <div className="wrapper">
-      <h2>useHistoryState</h2>
-      <div className="buttons">
-        <button onClick={() => undo()} disabled={!canUndo()}>
-          Undo
-        </button>
-        <button onClick={() => redo()} disabled={!canRedo()}>
-          Redo
-        </button>
-        <button onClick={() => clear()}>Clear</button>
-      </div>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Add new TODO"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-        />
-        <button
-          onClick={() => {
-            set(newTodo);
-            setNewTodo('');
-          }}
-        >
-          Add
-        </button>
-      </div>
-      <p>{state.present}</p>
+    <div>
+      <h2>useRandomInterval</h2>
+      <p>Count: {count}</p>
+      <button onClick={toggleInterval}>{isActive ? 'Stop' : 'Start'}</button>
     </div>
   );
 }
